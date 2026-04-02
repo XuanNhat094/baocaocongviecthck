@@ -62,53 +62,40 @@
 </div>
 
 <script>
-    // URL Web App của bạn
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
+   async function sendReport() {
+    const btn = document.getElementById('btnSend');
+    const url = "LINK_WEB_APP_MỚI_CỦA_BẠN"; // Dán link từ Bước 2 vào đây
 
-    async function sendReport() {
-        const btn = document.getElementById('btnSend');
-        const load = document.getElementById('loading');
+    const data = {
+        jobContent: document.getElementById('jobContent').value,
+        worker: document.getElementById('worker').value,
+        status: document.getElementById('status').value,
+        note: document.getElementById('note').value
+    };
+
+    btn.disabled = true;
+    btn.innerText = "ĐANG GỬI...";
+
+    try {
+        // Sử dụng fetch mặc định (không dùng no-cors để xem lỗi thật)
+        const response = await fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+
+        // Với Google Script, dữ liệu thường vào Sheets ngay cả khi báo lỗi CORS
+        alert("Kiểm tra Sheets! Dữ liệu thường sẽ xuất hiện sau 2-3 giây.");
         
-        const data = {
-            jobContent: document.getElementById('jobContent').value,
-            worker: document.getElementById('worker').value,
-            status: document.getElementById('status').value,
-            note: document.getElementById('note').value
-        };
-
-        // Kiểm tra dữ liệu trống
-        if(!data.jobContent || !data.worker) {
-            alert("Vui lòng điền 'Nội dung công việc' và 'Nhân sự thực hiện'!");
-            return;
-        }
-
-        btn.disabled = true;
-        load.style.display = "block";
-
-        try {
-            // Sử dụng fetch với mode 'no-cors' để chạy ổn định trên GitHub Pages
-            await fetch(WEB_APP_URL, {
-                method: "POST",
-                mode: "no-cors",
-                cache: "no-cache",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-
-            alert("🚀 Gửi báo cáo thành công!");
-            
-            // Tự động xóa nội dung sau khi gửi để nhập báo cáo mới
-            document.getElementById('jobContent').value = "";
-            document.getElementById('note').value = "";
-            
-        } catch (e) {
-            console.error(e);
-            alert("❌ Lỗi kết nối! Vui lòng kiểm tra lại mạng.");
-        } finally {
-            btn.disabled = false;
-            load.style.display = "none";
-        }
+        document.getElementById('jobContent').value = "";
+    } catch (e) {
+        // Nếu vẫn lỗi, thử lại với phương án dự phòng
+        navigator.sendBeacon(url, JSON.stringify(data));
+        alert("Đã gửi qua phương thức dự phòng (Beacon). Hãy kiểm tra Sheets!");
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "GỬI BÁO CÁO";
     }
+}
 </script>
 
 </body>
