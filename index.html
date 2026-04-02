@@ -1,115 +1,55 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Công Việc THCK</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Nhập Báo Cáo</title>
     <style>
-        body { background-color: #f4f7f9; padding: 20px; }
-        .card { max-width: 500px; margin: auto; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        .card-header { background: #0d6efd; color: white; border-radius: 15px 15px 0 0 !important; text-align: center; padding: 20px; }
-        .btn-submit { width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; }
-        #loading { display: none; }
+        body { font-family: Arial; padding: 20px; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; display: block; }
+        button { width: 100%; padding: 10px; background: blue; color: white; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="card-header">
-        <h4 class="mb-0">NHẬP BÁO CÁO CÔNG VIỆC</h4>
-    </div>
-    <div class="card-body p-4">
-        <div class="mb-3">
-            <label class="form-label">Ngày thực hiện</label>
-            <input type="date" id="ngay" class="form-control">
-        </div>
+    <h3>NHẬP DỮ LIỆU BÁO CÁO</h3>
+    <input type="date" id="ngay">
+    <textarea id="noidung" placeholder="Nội dung công việc"></textarea>
+    <select id="trangthai">
+        <option value="Hoàn thành">Hoàn thành</option>
+        <option value="Đang thực hiện">Đang thực hiện</option>
+    </select>
+    <input type="text" id="nhansu" placeholder="Tên nhân sự">
+    <input type="text" id="ghichu" placeholder="Ghi chú">
 
-        <div class="mb-3">
-            <label class="form-label">Nội dung công việc</label>
-            <textarea id="noidung" class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>
-        </div>
+    <button onclick="sendData()">GỬI DỮ LIỆU</button>
 
-        <div class="mb-3">
-            <label class="form-label">Trạng thái</label>
-            <select id="trangthai" class="form-select">
-                <option value="Hoàn thành">✅ Hoàn thành</option>
-                <option value="Đang thực hiện">🔵 Đang thực hiện</option>
-                <option value="Chưa bắt đầu">⚪ Chưa bắt đầu</option>
-            </select>
-        </div>
+    <script>
+        // Dán URL Web App của bạn vào đây
+        const URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 
-        <div class="mb-3">
-            <label class="form-label">Nhân sự thực hiện</label>
-            <input type="text" id="nhansu" class="form-control" placeholder="Tên nhân viên">
-        </div>
+        async function sendData() {
+            const payload = {
+                ngay: document.getElementById('ngay').value,
+                noidung: document.getElementById('noidung').value,
+                trangthai: document.getElementById('trangthai').value,
+                nhansu: document.getElementById('nhansu').value,
+                ghichu: document.getElementById('ghichu').value
+            };
 
-        <div class="mb-3">
-            <label class="form-label">Ghi chú</label>
-            <input type="text" id="ghichu" class="form-control" placeholder="Ghi chú thêm">
-        </div>
+            try {
+                // Gửi dữ liệu qua Google Sheets
+                await fetch(URL, {
+                    method: "POST",
+                    mode: "no-cors", // Bắt buộc cho GitHub Pages
+                    body: JSON.stringify(payload)
+                });
 
-        <button onclick="sendWorkReport()" id="btnSubmit" class="btn btn-primary btn-submit">
-            <span id="btnText">GỬI BÁO CÁO</span>
-            <span id="loading" class="spinner-border spinner-border-sm"></span>
-        </button>
-    </div>
-</div>
-
-<script>
-    // THAY LINK WEB APP CỦA BẠN VÀO ĐÂY
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-
-    // Tự động chọn ngày hôm nay
-    window.onload = () => {
-        document.getElementById('ngay').value = new Date().toISOString().split('T')[0];
-    };
-
-    function showLoading(isLoading) {
-        document.getElementById('btnSubmit').disabled = isLoading;
-        document.getElementById('loading').style.display = isLoading ? "inline-block" : "none";
-		document.getElementById('btnText').innerText = isLoading ? "ĐANG GỬI..." : "GỬI BÁO CÁO";
-    }
-
-    async function sendWorkReport() {
-        const data = {
-            action: "updateReport",
-            ngay: document.getElementById('ngay').value,
-            noidung: document.getElementById('noidung').value,
-            trangthai: document.getElementById('trangthai').value,
-            nhansu: document.getElementById('nhansu').value,
-            ghichu: document.getElementById('ghichu').value
-        };
-
-        if (!data.noidung || !data.nhansu) {
-            alert("Vui lòng điền đủ Nội dung và Nhân sự!");
-            return;
+                alert("Đã gửi dữ liệu thành công!");
+                document.getElementById('noidung').value = "";
+            } catch (e) {
+                alert("Lỗi kết nối!");
+            }
         }
-
-        if (!confirm(`Xác nhận gửi báo cáo cho ${data.nhansu}?`)) return;
-
-        showLoading(true);
-
-        try {
-            await fetch(WEB_APP_URL, {
-                method: "POST",
-                mode: "no-cors", // Bắt buộc để vượt lỗi CORS trên GitHub
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(data)
-            });
-
-            // Vì no-cors không đọc được kết quả, ta thông báo thành công và reset form
-            alert("✅ Đã gửi báo cáo! Vui lòng kiểm tra Google Sheets.");
-            document.getElementById('noidung').value = "";
-            document.getElementById('ghichu').value = "";
-
-        } catch (e) {
-            alert("❌ Lỗi kết nối: " + e.message);
-        } finally {
-            showLoading(false);
-        }
-    }
-</script>
-
+    </script>
 </body>
 </html>
