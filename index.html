@@ -3,113 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Công Việc KLM</title>
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4345/4345517.png">
+    <title>Báo Cáo Kỹ Thuật - GitHub Version</title>
     <style>
-        :root { --primary: #1a73e8; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin-top: 0; text-transform: uppercase; font-size: 1.2rem; }
-        
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; font-size: 0.9rem; }
-        input, select, textarea { 
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem;
-        }
-        
-        /* Slider tiến độ */
-        .progress-container { display: flex; align-items: center; gap: 10px; }
-        input[type=range] { flex: 1; cursor: pointer; }
-        .perc-val { font-weight: bold; color: var(--primary); width: 40px; }
-
-        button { 
-            width: 100%; padding: 15px; background: var(--primary); color: white; border: none; 
-            border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;
-        }
-        button:hover { background: #1557b0; transform: translateY(-2px); }
-        #msg { text-align: center; margin-top: 15px; font-weight: bold; display: none; }
+        :root { --primary: #1a73e8; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; justify-content: center; }
+        .card { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; margin-bottom: 20px; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .form-group { flex: 1; display: flex; flex-direction: column; }
+        label { margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #555; }
+        input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        button:disabled { background: #ccc; }
+        #msg { text-align: center; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>📝 BÁO CÁO CÔNG VIỆC</h2>
-    
-    <div class="form-group">
-        <label>Nội dung công việc:</label>
-        <textarea id="jobContent" rows="3" placeholder="Nhập chi tiết công việc đã làm..."></textarea>
+    <h2>📝 BÁO CÁO CÔNG VIỆC (GITHUB)</h2>
+    <div class="form-row">
+        <div class="form-group"><label>Dự án:</label><input type="text" id="project"></div>
+        <div class="form-group"><label>Mã thiết bị:</label><input type="text" id="deviceCode"></div>
     </div>
-
-    <div class="form-group">
-        <label>Người thực hiện:</label>
-        <input type="text" id="worker" placeholder="Tên nhân viên">
+    <div class="form-group"><label>Nội dung:</label><textarea id="jobContent" rows="2"></textarea></div>
+    <div class="form-row">
+        <div class="form-group"><label>Mã lỗi:</label><input type="text" id="errorCode"></div>
+        <div class="form-group"><label>Người làm:</label><input type="text" id="worker"></div>
     </div>
-
+    <div class="form-group"><label>Xử lý:</label><textarea id="solution" rows="2"></textarea></div>
     <div class="form-group">
         <label>Trạng thái:</label>
         <select id="status">
             <option value="Đang thực hiện">⏳ Đang thực hiện</option>
             <option value="Đã hoàn thành">✅ Đã hoàn thành</option>
-            <option value="Tạm dừng">🚫 Tạm dừng</option>
         </select>
     </div>
-
-    <div class="form-group">
-        <label>Tiến độ: <span id="progVal" class="perc-val">50%</span></label>
-        <div class="progress-container">
-            <input type="range" id="progress" min="0" max="100" value="50" oninput="updateVal(this.value)">
-        </div>
+    <div style="background:#e8f0fe; padding:10px; border-radius:8px;">
+        <label>Tiến độ: <span id="pVal" style="color:var(--primary); font-weight:bold;">50%</span></label>
+        <input type="range" id="progress" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('pVal').innerText=this.value+'%'">
     </div>
-
-    <button onclick="sendReport()" id="btnSend">GỬI BÁO CÁO</button>
+    <button onclick="sendData()" id="btnSend">GỬI LÊN GOOGLE SHEETS</button>
     <div id="msg"></div>
 </div>
 
 <script>
-    // DÁN LINK WEB APP CỦA BẠN VÀO ĐÂY
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
+    const G_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 
-    function updateVal(v) {
-        document.getElementById('progVal').innerText = v + "%";
-    }
-
-    async function sendReport() {
+    function sendData() {
+        const btn = document.getElementById('btnSend');
+        const msg = document.getElementById('msg');
+        
         const data = {
+            project: document.getElementById('project').value,
+            deviceCode: document.getElementById('deviceCode').value,
             jobContent: document.getElementById('jobContent').value,
+            errorCode: document.getElementById('errorCode').value,
             worker: document.getElementById('worker').value,
+            solution: document.getElementById('solution').value,
             status: document.getElementById('status').value,
             progress: document.getElementById('progress').value
         };
 
-        if(!data.jobContent || !data.worker) {
-            alert("Vui lòng nhập đầy đủ nội dung và tên!");
-            return;
-        }
+        if(!data.worker || !data.jobContent) return alert("Thiếu tên hoặc nội dung!");
 
-        const btn = document.getElementById('btnSend');
-        const msg = document.getElementById('msg');
-        
         btn.disabled = true;
-        btn.innerText = "ĐANG GỬI...";
-        
-        try {
-            await fetch(WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify(data)
-            });
-            msg.style.display = "block";
+        msg.innerText = "⏳ Đang gửi dữ liệu...";
+
+        // Kỹ thuật sử dụng fetch gửi JSON qua Google Script từ GitHub
+        fetch(G_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(data),
+            contentType: "application/json"
+        })
+        .then(() => {
+            // Lưu ý: Do chính sách bảo mật, Google đôi khi không trả về phản hồi chuẩn
+            // nhưng dữ liệu VẪN vào Sheets thành công.
             msg.style.color = "green";
-            msg.innerText = "🚀 Đã gửi báo cáo thành công!";
-            // Reset form
+            msg.innerText = "✅ Đã gửi thành công!";
             document.getElementById('jobContent').value = "";
-        } catch (e) {
-            alert("Lỗi khi gửi báo cáo!");
-        }
-        
-        btn.disabled = false;
-        btn.innerText = "GỬI BÁO CÁO";
+            document.getElementById('solution').value = "";
+            btn.disabled = false;
+        })
+        .catch(err => {
+            msg.style.color = "red";
+            msg.innerText = "❌ Lỗi: " + err;
+            btn.disabled = false;
+        });
     }
 </script>
-
 </body>
 </html>
