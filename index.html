@@ -1,55 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Nhập Báo Cáo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Công Việc KLM</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4345/4345517.png">
     <style>
-        body { font-family: Arial; padding: 20px; }
-        input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; display: block; }
-        button { width: 100%; padding: 10px; background: blue; color: white; border: none; cursor: pointer; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; margin-top: 0; text-transform: uppercase; font-size: 1.2rem; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; font-size: 0.9rem; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem;
+        }
+        
+        /* Slider tiến độ */
+        .progress-container { display: flex; align-items: center; gap: 10px; }
+        input[type=range] { flex: 1; cursor: pointer; }
+        .perc-val { font-weight: bold; color: var(--primary); width: 40px; }
+
+        button { 
+            width: 100%; padding: 15px; background: var(--primary); color: white; border: none; 
+            border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        button:hover { background: #1557b0; transform: translateY(-2px); }
+        #msg { text-align: center; margin-top: 15px; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
 
-    <h3>NHẬP DỮ LIỆU BÁO CÁO</h3>
-    <input type="date" id="ngay">
-    <textarea id="noidung" placeholder="Nội dung công việc"></textarea>
-    <select id="trangthai">
-        <option value="Hoàn thành">Hoàn thành</option>
-        <option value="Đang thực hiện">Đang thực hiện</option>
-    </select>
-    <input type="text" id="nhansu" placeholder="Tên nhân sự">
-    <input type="text" id="ghichu" placeholder="Ghi chú">
+<div class="card">
+    <h2>📝 BÁO CÁO CÔNG VIỆC</h2>
+    
+    <div class="form-group">
+        <label>Nội dung công việc:</label>
+        <textarea id="jobContent" rows="3" placeholder="Nhập chi tiết công việc đã làm..."></textarea>
+    </div>
 
-    <button onclick="sendData()">GỬI DỮ LIỆU</button>
+    <div class="form-group">
+        <label>Người thực hiện:</label>
+        <input type="text" id="worker" placeholder="Tên nhân viên">
+    </div>
 
-    <script>
-        // Dán URL Web App của bạn vào đây
-        const URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
+    <div class="form-group">
+        <label>Trạng thái:</label>
+        <select id="status">
+            <option value="Đang thực hiện">⏳ Đang thực hiện</option>
+            <option value="Đã hoàn thành">✅ Đã hoàn thành</option>
+            <option value="Tạm dừng">🚫 Tạm dừng</option>
+        </select>
+    </div>
 
-        async function sendData() {
-            const payload = {
-                ngay: document.getElementById('ngay').value,
-                noidung: document.getElementById('noidung').value,
-                trangthai: document.getElementById('trangthai').value,
-                nhansu: document.getElementById('nhansu').value,
-                ghichu: document.getElementById('ghichu').value
-            };
+    <div class="form-group">
+        <label>Tiến độ: <span id="progVal" class="perc-val">50%</span></label>
+        <div class="progress-container">
+            <input type="range" id="progress" min="0" max="100" value="50" oninput="updateVal(this.value)">
+        </div>
+    </div>
 
-            try {
-                // Gửi dữ liệu qua Google Sheets
-                await fetch(URL, {
-                    method: "POST",
-                    mode: "no-cors", // Bắt buộc cho GitHub Pages
-                    body: JSON.stringify(payload)
-                });
+    <button onclick="sendReport()" id="btnSend">GỬI BÁO CÁO</button>
+    <div id="msg"></div>
+</div>
 
-                alert("Đã gửi dữ liệu thành công!");
-                document.getElementById('noidung').value = "";
-            } catch (e) {
-                alert("Lỗi kết nối!");
-            }
+<script>
+    // DÁN LINK WEB APP CỦA BẠN VÀO ĐÂY
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
+
+    function updateVal(v) {
+        document.getElementById('progVal').innerText = v + "%";
+    }
+
+    async function sendReport() {
+        const data = {
+            jobContent: document.getElementById('jobContent').value,
+            worker: document.getElementById('worker').value,
+            status: document.getElementById('status').value,
+            progress: document.getElementById('progress').value
+        };
+
+        if(!data.jobContent || !data.worker) {
+            alert("Vui lòng nhập đầy đủ nội dung và tên!");
+            return;
         }
-    </script>
+
+        const btn = document.getElementById('btnSend');
+        const msg = document.getElementById('msg');
+        
+        btn.disabled = true;
+        btn.innerText = "ĐANG GỬI...";
+        
+        try {
+            await fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify(data)
+            });
+            msg.style.display = "block";
+            msg.style.color = "green";
+            msg.innerText = "🚀 Đã gửi báo cáo thành công!";
+            // Reset form
+            document.getElementById('jobContent').value = "";
+        } catch (e) {
+            alert("Lỗi khi gửi báo cáo!");
+        }
+        
+        btn.disabled = false;
+        btn.innerText = "GỬI BÁO CÁO";
+    }
+</script>
+
 </body>
 </html>
