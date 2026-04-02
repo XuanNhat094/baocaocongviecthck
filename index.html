@@ -1,96 +1,74 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Kỹ Thuật - GitHub Version</title>
-    <style>
-        :root { --primary: #1a73e8; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; justify-content: center; }
-        .card { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin-bottom: 20px; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .form-group { flex: 1; display: flex; flex-direction: column; }
-        label { margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; color: #555; }
-        input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        button:disabled { background: #ccc; }
-        #msg { text-align: center; margin-top: 15px; font-weight: bold; }
-    </style>
-</head>
-<body>
-
 <div class="card">
-    <h2>📝 BÁO CÁO CÔNG VIỆC (GITHUB)</h2>
-    <div class="form-row">
-        <div class="form-group"><label>Dự án:</label><input type="text" id="project"></div>
-        <div class="form-group"><label>Mã thiết bị:</label><input type="text" id="deviceCode"></div>
+    <h2>📝 BÁO CÁO CÔNG VIỆC</h2>
+    
+    <div class="form-group">
+        <label>Nội dung công việc:</label>
+        <textarea id="jobContent" rows="3" placeholder="Nhập chi tiết công việc..."></textarea>
     </div>
-    <div class="form-group"><label>Nội dung:</label><textarea id="jobContent" rows="2"></textarea></div>
-    <div class="form-row">
-        <div class="form-group"><label>Mã lỗi:</label><input type="text" id="errorCode"></div>
-        <div class="form-group"><label>Người làm:</label><input type="text" id="worker"></div>
+
+    <div class="form-group">
+        <label>Nhân sự thực hiện:</label>
+        <input type="text" id="worker" placeholder="Tên nhân viên">
     </div>
-    <div class="form-group"><label>Xử lý:</label><textarea id="solution" rows="2"></textarea></div>
+
     <div class="form-group">
         <label>Trạng thái:</label>
         <select id="status">
             <option value="Đang thực hiện">⏳ Đang thực hiện</option>
             <option value="Đã hoàn thành">✅ Đã hoàn thành</option>
+            <option value="Chờ vật tư">🚫 Chờ vật tư</option>
         </select>
     </div>
-    <div style="background:#e8f0fe; padding:10px; border-radius:8px;">
-        <label>Tiến độ: <span id="pVal" style="color:var(--primary); font-weight:bold;">50%</span></label>
-        <input type="range" id="progress" min="0" max="100" value="50" style="width:100%" oninput="document.getElementById('pVal').innerText=this.value+'%'">
+
+    <div class="form-group">
+        <label>Ghi chú (Cột F):</label>
+        <input type="text" id="note" placeholder="Thông tin thêm nếu có...">
     </div>
-    <button onclick="sendData()" id="btnSend">GỬI LÊN GOOGLE SHEETS</button>
-    <div id="msg"></div>
+
+    <button onclick="sendReport()" id="btnSend">GỬI LÊN HỆ THỐNG</button>
+    <p id="msg" style="text-align:center; display:none; font-weight:bold;"></p>
 </div>
 
 <script>
     const G_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 
-    function sendData() {
+    async function sendReport() {
         const btn = document.getElementById('btnSend');
         const msg = document.getElementById('msg');
         
         const data = {
-            project: document.getElementById('project').value,
-            deviceCode: document.getElementById('deviceCode').value,
             jobContent: document.getElementById('jobContent').value,
-            errorCode: document.getElementById('errorCode').value,
             worker: document.getElementById('worker').value,
-            solution: document.getElementById('solution').value,
             status: document.getElementById('status').value,
-            progress: document.getElementById('progress').value
+            note: document.getElementById('note').value
         };
 
-        if(!data.worker || !data.jobContent) return alert("Thiếu tên hoặc nội dung!");
+        if(!data.jobContent || !data.worker) {
+            alert("Vui lòng điền nội dung và tên người làm!");
+            return;
+        }
 
         btn.disabled = true;
-        msg.innerText = "⏳ Đang gửi dữ liệu...";
+        msg.innerText = "⏳ Đang xử lý...";
+        msg.style.display = "block";
 
-        // Kỹ thuật sử dụng fetch gửi JSON qua Google Script từ GitHub
-        fetch(G_SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify(data),
-            contentType: "application/json"
-        })
-        .then(() => {
-            // Lưu ý: Do chính sách bảo mật, Google đôi khi không trả về phản hồi chuẩn
-            // nhưng dữ liệu VẪN vào Sheets thành công.
-            msg.style.color = "green";
-            msg.innerText = "✅ Đã gửi thành công!";
+        try {
+            // Khi chạy từ GitHub Pages, fetch cần mode: 'no-cors' để vượt qua chính sách bảo mật
+            await fetch(G_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(data)
+            });
+            
+            alert("✅ Gửi thành công!");
             document.getElementById('jobContent').value = "";
-            document.getElementById('solution').value = "";
+            document.getElementById('note').value = "";
+            msg.innerText = "✅ Đã lưu vào Sheets!";
+        } catch (e) {
+            alert("❌ Lỗi: " + e);
+            msg.innerText = "❌ Gửi thất bại!";
+        } finally {
             btn.disabled = false;
-        })
-        .catch(err => {
-            msg.style.color = "red";
-            msg.innerText = "❌ Lỗi: " + err;
-            btn.disabled = false;
-        });
+        }
     }
 </script>
-</body>
-</html>
