@@ -3,122 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Công Việc KLM</title>
+    <title>Báo Cáo Công Việc THCK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f7f9; padding: 20px; }
-        .card { max-width: 800px; margin: auto; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .card-header { background: #0d6efd; color: white; border-radius: 15px 15px 0 0 !important; text-align: center; padding: 15px; }
-        .table-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .card { max-width: 600px; margin: auto; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .card-header { background: #0d6efd; color: white; border-radius: 15px 15px 0 0 !important; text-align: center; padding: 20px; }
+        .btn-submit { width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; }
+        #loadingSpinner { display: none; }
+        .table-card { max-width: 900px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="card-header"><h4>NHẬP BÁO CÁO MỚI</h4></div>
+    <div class="card-header">
+        <h4 class="mb-0">NHẬP BÁO CÁO CÔNG VIỆC</h4>
+    </div>
     <div class="card-body p-4">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Nội dung</label>
-                <input type="text" id="jobContent" class="form-control">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Nhân sự</label>
-                <input type="text" id="worker" class="form-control">
-            </div>
+        <div class="mb-3">
+            <label class="form-label">Ngày thực hiện</label>
+            <input type="date" id="ngay" class="form-control">
         </div>
-        <button onclick="sendWorkReport()" id="btnSubmit" class="btn btn-primary w-100">GỬI BÁO CÁO</button>
+
+        <div class="mb-3">
+            <label class="form-label">Nội dung công việc</label>
+            <textarea id="noidung" class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <select id="trangthai" class="form-select">
+                <option value="Hoàn thành">✅ Hoàn thành</option>
+                <option value="Đang thực hiện">🔵 Đang thực hiện</option>
+                <option value="Chưa bắt đầu">⚪ Chưa bắt đầu</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nhân sự thực hiện</label>
+            <input type="text" id="nhansu" class="form-control" placeholder="Tên nhân viên">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ghi chú</label>
+            <input type="text" id="ghichu" class="form-control" placeholder="Ghi chú thêm">
+        </div>
+
+        <button onclick="sendWorkReport()" id="btnSubmit" class="btn btn-primary btn-submit">
+            <span id="btnText">GỬI BÁO CÁO</span>
+            <span id="loadingSpinner" class="spinner-border spinner-border-sm"></span>
+        </button>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header bg-success"><h4>DANH SÁCH BÁO CÁO</h4></div>
+<div class="card table-card">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">DANH SÁCH & BỘ LỌC</h4>
+    </div>
     <div class="card-body">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label class="form-label">Lọc theo ngày:</label>
+        <div class="row g-3 mb-3">
+            <div class="col-md-8">
                 <input type="date" id="filterDate" class="form-control" onchange="filterData()">
             </div>
-            <div class="col-md-6 d-flex align-items-end">
-                <button class="btn btn-secondary w-100" onclick="loadData()">Tải lại dữ liệu</button>
+            <div class="col-md-4">
+                <button class="btn btn-outline-secondary w-100" onclick="loadData()">Tải lại dữ liệu</button>
             </div>
         </div>
         
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
                     <tr>
                         <th>Ngày</th>
                         <th>Nội dung</th>
-                        <th>Nhân sự</th>
                         <th>Trạng thái</th>
+                        <th>Nhân sự</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    </tbody>
+                    <tr><td colspan="4" class="text-center">Đang tải dữ liệu...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
 <script>
+    // Link Apps Script của bạn
     const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
     let allData = [];
 
-    // 1. Hàm gửi dữ liệu (doPost)
-    async function sendWorkReport() {
+    // Gán ngày mặc định là hôm nay
+    document.getElementById('ngay').valueAsDate = new Date();
+
+    // 1. HÀM GỬI DỮ LIỆU (POST)
+    function sendWorkReport() {
         const btn = document.getElementById('btnSubmit');
+        const text = document.getElementById('btnText');
+        const loader = document.getElementById('loadingSpinner');
+
         const params = new URLSearchParams();
-        params.append('jobContent', document.getElementById('jobContent').value);
-        params.append('worker', document.getElementById('worker').value);
-        params.append('status', 'Đang thực hiện');
+        params.append('jobContent', document.getElementById('noidung').value);
+        params.append('worker', document.getElementById('nhansu').value);
+        params.append('status', document.getElementById('trangthai').value);
+        params.append('note', document.getElementById('ghichu').value);
+        // Lưu ý: Nếu bạn muốn gửi ngày người dùng chọn thay vì ngày hệ thống, hãy dùng param dưới đây
+        params.append('customDate', document.getElementById('ngay').value);
+
+        if(!document.getElementById('noidung').value || !document.getElementById('nhansu').value) {
+            alert("Vui lòng nhập Nội dung và Tên nhân sự!");
+            return;
+        }
 
         btn.disabled = true;
-        await fetch(G_URL, { method: "POST", mode: "no-cors", body: params.toString() });
-        alert("Đã gửi! Đang cập nhật danh sách...");
-        loadData(); // Tải lại bảng sau khi gửi
-        btn.disabled = false;
+        text.innerText = "ĐANG GỬI...";
+        loader.style.display = "inline-block";
+
+        fetch(G_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: params.toString(),
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(() => {
+            alert("✅ Đã gửi báo cáo thành công!");
+            document.getElementById('noidung').value = "";
+            document.getElementById('ghichu').value = "";
+            loadData(); // Tải lại danh sách sau khi gửi
+        })
+        .catch(err => alert("Lỗi: " + err))
+        .finally(() => {
+            btn.disabled = false;
+            text.innerText = "GỬI BÁO CÁO";
+            loader.style.display = "none";
+        });
     }
 
-    // 2. Hàm lấy dữ liệu về (doGet)
+    // 2. HÀM LẤY DỮ LIỆU (GET)
     async function loadData() {
         try {
             const res = await fetch(G_URL);
             allData = await res.json();
             displayData(allData);
         } catch (e) {
-            console.log("Lỗi tải dữ liệu: " + e);
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" class="text-danger text-center">Lỗi tải dữ liệu</td></tr>`;
         }
     }
 
-    // 3. Hàm hiển thị dữ liệu vào bảng
+    // 3. HIỂN THỊ DỮ LIỆU
     function displayData(data) {
         const body = document.getElementById('tableBody');
         body.innerHTML = "";
-        data.forEach(item => {
-            // Định dạng ngày từ Sheets sang d/m/y để dễ nhìn
-            let dateObj = new Date(item.ngay);
-            let dateStr = dateObj.toLocaleDateString('vi-VN');
-
+        data.reverse().forEach(item => { // Đảo ngược để việc mới nhất lên đầu
+            let dateStr = new Date(item.ngay).toLocaleDateString('vi-VN');
             body.innerHTML += `
                 <tr>
                     <td>${dateStr}</td>
                     <td>${item.noidung}</td>
+                    <td><span class="badge ${item.trangthai === 'Hoàn thành' ? 'bg-success' : 'bg-warning'}">${item.trangthai}</span></td>
                     <td>${item.nhansu}</td>
-                    <td>${item.trangthai}</td>
                 </tr>
             `;
         });
     }
 
-    // 4. Hàm lọc theo ngày
+    // 4. LỌC DỮ LIỆU THEO NGÀY
     function filterData() {
-        const filterVal = document.getElementById('filterDate').value; // Định dạng yyyy-mm-dd
+        const filterVal = document.getElementById('filterDate').value;
         if (!filterVal) {
             displayData(allData);
             return;
         }
-
         const filtered = allData.filter(item => {
             let itemDate = new Date(item.ngay).toISOString().split('T')[0];
             return itemDate === filterVal;
@@ -126,7 +182,7 @@
         displayData(filtered);
     }
 
-    // Tự động tải dữ liệu khi mở web
+    // Tự động tải dữ liệu khi mở trang
     window.onload = loadData;
 </script>
 
