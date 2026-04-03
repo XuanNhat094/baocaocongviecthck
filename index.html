@@ -1,59 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <title>Nhập dữ liệu</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #4facfe;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #4facfe;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #007bff;
+    }
+
+    #status {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .success { color: green; }
+    .error { color: red; }
+  </style>
 </head>
+
 <body>
 
-  <h2>Form nhập dữ liệu</h2>
+<div class="container">
+  <h2>📋 Nhập dữ liệu</h2>
 
   <form id="myForm">
-    <label>Ngày tháng:</label><br>
-    <input type="date" id="lastDate"><br><br>
+    <label>Ngày tháng</label>
+    <input type="date" id="lastDate" required>
 
-    <label>Nội dung:</label><br>
-    <input type="text" id="worker"><br><br>
+    <label>Nội dung</label>
+    <input type="text" id="worker" placeholder="Nhập nội dung" required>
 
-    <label>Họ tên:</label><br>
-    <input type="text" id="name"><br><br>
+    <label>Họ tên</label>
+    <input type="text" id="name" placeholder="Nhập họ tên" required>
 
-    <label>Ghi chú:</label><br>
-    <input type="text" id="cycle"><br><br>
+    <label>Ghi chú</label>
+    <input type="text" id="cycle" placeholder="Ghi chú thêm">
 
-    <button type="submit">Gửi</button>
+    <button type="submit">🚀 Gửi dữ liệu</button>
   </form>
 
   <p id="status"></p>
+</div>
 
-  <script>
-    document.getElementById("myForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+<script>
+document.getElementById("myForm").addEventListener("submit", function(e) {
+  e.preventDefault();
 
-      var data = {
-        lastDate: document.getElementById("lastDate").value,
-        worker: document.getElementById("worker").value,
-        name: document.getElementById("name").value,
-        cycle: document.getElementById("cycle").value
-      };
+  let status = document.getElementById("status");
+  status.innerText = "⏳ Đang gửi...";
+  status.className = "";
 
-      fetch("https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => res.text())
-      .then(result => {
-        document.getElementById("status").innerText = result;
-        document.getElementById("myForm").reset();
-      })
-      .catch(err => {
-        document.getElementById("status").innerText = "Lỗi gửi dữ liệu!";
-      });
-    });
-  </script>
+  var formData = new FormData();
+  formData.append("lastDate", document.getElementById("lastDate").value);
+  formData.append("worker", document.getElementById("worker").value);
+  formData.append("name", document.getElementById("name").value);
+  formData.append("cycle", document.getElementById("cycle").value);
+
+  fetch("https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.text())
+  .then(result => {
+    status.innerText = "✅ Gửi thành công!";
+    status.className = "success";
+    document.getElementById("myForm").reset();
+  })
+  .catch(err => {
+    status.innerText = "❌ Lỗi gửi dữ liệu!";
+    status.className = "error";
+  });
+});
+</script>
 
 </body>
 </html>
