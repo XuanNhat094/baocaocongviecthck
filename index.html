@@ -1,120 +1,59 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Công Việc KLM</title>
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4345/4345517.png">
-    <style>
-        :root { --primary: #1a73e8; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .card { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin: 0 0 20px 0; text-transform: uppercase; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; font-size: 0.85rem; }
-        input, select, textarea { 
-            width: 100%; padding: 12px; border: 1.5px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.2s;
-        }
-        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
-        
-        button { 
-            width: 100%; padding: 16px; background: var(--primary); color: white; border: none; 
-            border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s;
-        }
-        button:hover { background: #1765cc; }
-        button:disabled { background: #bdc1c6; cursor: not-allowed; }
-        
-        #loading { text-align: center; margin-top: 15px; font-weight: bold; color: var(--primary); display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Nhập dữ liệu</title>
 </head>
 <body>
 
-<div class="card">
-    <h2>📝 BÁO CÁO CÔNG VIỆC</h2>
-    
-    <div class="form-group">
-        <label>Nội dung công việc (Cột C):</label>
-        <textarea id="jobContent" rows="3" placeholder="Nhập chi tiết công việc..."></textarea>
-    </div>
+  <h2>Form nhập dữ liệu</h2>
 
-    <div class="form-group">
-        <label>Nhân sự thực hiện (Cột E):</label>
-        <input type="text" id="worker" placeholder="Tên nhân viên">
-    </div>
+  <form id="myForm">
+    <label>Ngày tháng:</label><br>
+    <input type="date" id="lastDate"><br><br>
 
-    <div class="form-group">
-        <label>Trạng thái (Cột D):</label>
-        <select id="status">
-            <option value="Đang thực hiện">⏳ Đang thực hiện</option>
-            <option value="Đã hoàn thành">✅ Đã hoàn thành</option>
-            <option value="Chờ vật tư/Tạm dừng">🚫 Chờ vật tư/Tạm dừng</option>
-        </select>
-    </div>
+    <label>Nội dung:</label><br>
+    <input type="text" id="worker"><br><br>
 
-    <div class="form-group">
-        <label>Ghi chú (Cột F):</label>
-        <input type="text" id="note" placeholder="Thông tin thêm nếu có...">
-    </div>
+    <label>Họ tên:</label><br>
+    <input type="text" id="name"><br><br>
 
-    <button onclick="sendReport()" id="btnSend">GỬI BÁO CÁO</button>
-    <div id="loading">⌛ Đang lưu vào hệ thống...</div>
-</div>
+    <label>Ghi chú:</label><br>
+    <input type="text" id="cycle"><br><br>
 
-<script>
-    // Dán link Web App (đuôi /exec) đã Deploy ở chế độ "Anyone" vào đây
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-    
-    function sendReport() {
-        const btn = document.getElementById('btnSend');
-        const load = document.getElementById('loading');
-        
-        // Lấy dữ liệu từ các ô nhập
-        const jobContent = document.getElementById('jobContent').value;
-        const worker = document.getElementById('worker').value;
-        const status = document.getElementById('status').value;
-        const note = document.getElementById('note').value;
+    <button type="submit">Gửi</button>
+  </form>
 
-        if(!jobContent || !worker) {
-            alert("Vui lòng điền đủ 'Nội dung' và 'Nhân sự thực hiện'!");
-            return;
+  <p id="status"></p>
+
+  <script>
+    document.getElementById("myForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      var data = {
+        lastDate: document.getElementById("lastDate").value,
+        worker: document.getElementById("worker").value,
+        name: document.getElementById("name").value,
+        cycle: document.getElementById("cycle").value
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
         }
-
-        btn.disabled = true;
-        load.style.display = "block";
-
-        // Sử dụng URLSearchParams để gửi dữ liệu dạng Form-Encoded (ổn định nhất cho GitHub)
-        const formData = new URLSearchParams();
-        formData.append('jobContent', jobContent);
-        formData.append('worker', worker);
-        formData.append('status', status);
-        formData.append('note', note);
-
-        fetch(WEB_APP_URL, {
-            method: "POST",
-            mode: "no-cors", // Vượt qua chính sách bảo mật trình duyệt
-            cache: "no-cache",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: formData.toString()
-        })
-        .then(() => {
-            // Do mode no-cors không đọc được phản hồi, chúng ta giả định gửi đi là thành công
-            alert("🚀 Đã gửi báo cáo thành công!");
-            document.getElementById('jobContent').value = "";
-            document.getElementById('note').value = "";
-        })
-        .catch(e => {
-            console.error(e);
-            alert("❌ Lỗi kết nối! Kiểm tra lại link Script hoặc mạng.");
-        })
-        .finally(() => {
-            btn.disabled = false;
-            load.style.display = "none";
-        });
-    }
-</script>
+      })
+      .then(res => res.text())
+      .then(result => {
+        document.getElementById("status").innerText = result;
+        document.getElementById("myForm").reset();
+      })
+      .catch(err => {
+        document.getElementById("status").innerText = "Lỗi gửi dữ liệu!";
+      });
+    });
+  </script>
 
 </body>
 </html>
