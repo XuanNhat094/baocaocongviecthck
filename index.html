@@ -1,126 +1,137 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Nhập dữ liệu</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Bảo Trì Máy Móc</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --success: #28a745;
+            --danger: #d32f2f;
+            --warning: #f9ab00;
+        }
 
-    .container {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      width: 320px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; background-color: #f1f3f4; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        h2 { color: var(--primary); text-align: center; margin-bottom: 25px; text-transform: uppercase; }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+        /* Ô tìm kiếm nổi bật */
+        .search-container { margin-bottom: 20px; padding: 15px; background: #fffde7; border-radius: 8px; border: 1px solid #ffe082; display: flex; align-items: center; gap: 10px; }
+        .search-input { flex: 1; padding: 12px; border: 2px solid var(--primary); border-radius: 6px; font-size: 16px; font-weight: bold; }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      outline: none;
-    }
+        /* Form nhập liệu */
+        .form-section { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #e0e0e0; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .btn-save { background: var(--success); color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        .btn-save:hover { background: #218838; }
 
-    input:focus {
-      border-color: #4facfe;
-    }
+        /* Bảng hiển thị */
+        .table-res { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 800px; }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        tr:hover { background: #f1f8ff; }
+        tr.hidden { display: none; }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #4facfe;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
+        /* Badge trạng thái */
+        .status { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+        .overdue { background: #fdecea; color: var(--danger); border: 1px solid #fad2cf; }
+        .ok { background: #e6f4ea; color: #1e7e34; border: 1px solid #ceead6; }
 
-    button:hover {
-      background: #007bff;
-    }
-
-    #status {
-      text-align: center;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    .success { color: green; }
-    .error { color: red; }
-  </style>
+        #loading { text-align: center; display: none; color: var(--primary); font-weight: bold; padding: 10px; }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
-  <h2>📋 Nhập dữ liệu</h2>
+    <h2>🛠️ Quản Lý Bảo Trì Thiết Bị</h2>
 
-  <form id="myForm">
-    <label>Ngày tháng</label>
-    <input type="date" id="lastDate" required>
+    <div class="search-container">
+        <span>🔍 <b>TÌM KIẾM:</b></span>
+        <input type="text" id="searchInput" class="search-input" onkeyup="filterTable()" placeholder="Nhập Mã số hoặc Tên máy để lọc nhanh...">
+    </div>
+    <div id="loading">⌛ Đang xử lý dữ liệu...</div>
 
-    <label>Nội dung</label>
-    <input type="text" id="worker" placeholder="Nhập nội dung" required>
-
-    <label>Họ tên</label>
-    <input type="text" id="name" placeholder="Nhập họ tên" required>
-
-    <label>Ghi chú</label>
-    <input type="text" id="cycle" placeholder="Ghi chú thêm">
-
-    <button type="submit">🚀 Gửi dữ liệu</button>
-  </form>
-
-  <p id="status"></p>
+    <div class="form-section">
+        <div class="form-grid">
+            <input type="text" id="mCode" placeholder="Mã số thiết bị">
+            <input type="text" id="mName" placeholder="Tên máy">
+            <input type="date" id="mDate" title="Ngày bảo trì gần nhất">
+            <input type="number" id="mCycle" placeholder="Chu kỳ (Ngày)">
+        </div>
+        <button class="btn-save" onclick="addMachine()">📥 LƯU VÀO GOOGLE SHEETS</button>
+    </div>
+    <div class="table-res">
+        <table id="machineTable">
+            <thead>
+                <tr>
+                    <th>Mã Số</th>
+                    <th>Tên Thiết Bị</th>
+                    <th>Ngày Bảo Trì Gần Nhất</th>
+                    <th>Chu Kỳ</th>
+                    <th>Ngày Bảo Trì Tiếp Theo</th>
+                    <th>Trạng Thái</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </div>
 
 <script>
-document.getElementById("myForm").addEventListener("submit", function(e) {
-  e.preventDefault();
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 
-  let status = document.getElementById("status");
-  status.innerText = "⏳ Đang gửi...";
-  status.className = "";
+    async function loadData() {
+        showLoading(true);
+        try {
+            const res = await fetch(WEB_APP_URL);
+            const data = await res.json();
+            renderTable(data);
+        } catch (e) { console.error(e); }
+        showLoading(false);
+    }
 
-  var formData = new FormData();
-  formData.append("lastDate", document.getElementById("lastDate").value);
-  formData.append("worker", document.getElementById("worker").value);
-  formData.append("name", document.getElementById("name").value);
-  formData.append("cycle", document.getElementById("cycle").value);
+    async function addMachine() {
+        const code = document.getElementById('mCode').value;
+        const name = document.getElementById('mName').value;
+        const lastDate = document.getElementById('mDate').value;
+        const cycle = document.getElementById('mCycle').value;
 
-  fetch("https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec", {
-    method: "POST",
-    body: formData
-  })
-  .then(res => res.text())
-  .then(result => {
-    status.innerText = "✅ Gửi thành công!";
-    status.className = "success";
-    document.getElementById("myForm").reset();
-  })
-  .catch(err => {
-    status.innerText = "❌ Lỗi gửi dữ liệu!";
-    status.className = "error";
-  });
-});
-</script>
+        if (!code || !name || !lastDate || !cycle) return alert("Vui lòng nhập đủ thông tin!");
 
-</body>
-</html>
+        showLoading(true);
+        const payload = { code, name, lastDate, cycle: parseInt(cycle) };
+
+        try {
+            await fetch(WEB_APP_URL, {
+                method: "POST",
+                redirect: "follow",
+                body: JSON.stringify(payload)
+            });
+            alert("Đã cập nhật thành công!");
+            location.reload();
+        } catch (e) { alert("Lỗi kết nối!"); }
+        showLoading(false);
+    }
+
+    function renderTable(data) {
+        const tbody = document.querySelector('#machineTable tbody');
+        tbody.innerHTML = '';
+        const now = new Date();
+        now.setHours(0,0,0,0);
+
+        data.forEach(row => {
+            // KHỚP CỘT THEO SHEET: 0:ID, 1:MaSo, 2:TenMay, 3:NgayGanNhat, 4:ChuKy
+            const code = row[1] || '';
+            const name = row[2] || '';
+            const lastDate = row[3];
+            const cycle = row[4] || 0;
+
+            if (!lastDate) return;
+
+            const dLast = new Date(lastDate);
+            const dNext = new Date(dLast);
+            dNext.setDate(dLast.getDate() + parseInt(cycle));
