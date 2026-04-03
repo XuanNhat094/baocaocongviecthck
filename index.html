@@ -159,10 +159,12 @@
             let dateStr = new Date(item.ngay).toLocaleDateString('vi-VN');
             body.innerHTML += `
                 <tr>
+                    <td>${item.stt}</td>
                     <td>${dateStr}</td>
                     <td>${item.noidung}</td>
                     <td><span class="badge ${item.trangthai === 'Hoàn thành' ? 'bg-success' : 'bg-warning'}">${item.trangthai}</span></td>
                     <td>${item.nhansu}</td>
+                    <td>${item.ghichu}</td>
                 </tr>
             `;
         });
