@@ -3,117 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Công Việc KLM</title>
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4345/4345517.png">
+    <title>Báo Cáo Công Việc THCK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #1a73e8; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .card { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin: 0 0 20px 0; text-transform: uppercase; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; font-size: 0.85rem; }
-        input, select, textarea { 
-            width: 100%; padding: 12px; border: 1.5px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.2s;
-        }
-        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
-        
-        button { 
-            width: 100%; padding: 16px; background: var(--primary); color: white; border: none; 
-            border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s;
-        }
-        button:hover { background: #1765cc; }
-        button:disabled { background: #bdc1c6; cursor: not-allowed; }
-        
-        #loading { text-align: center; margin-top: 15px; font-weight: bold; color: var(--primary); display: none; }
+        body { background-color: #f4f7f9; padding: 20px; }
+        .card { max-width: 500px; margin: auto; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .card-header { background: #0d6efd; color: white; border-radius: 15px 15px 0 0 !important; text-align: center; padding: 20px; }
+        .btn-submit { width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; }
+        #loading { display: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>📝 BÁO CÁO CÔNG VIỆC</h2>
-    
-    <div class="form-group">
-        <label>Nội dung công việc (Cột C):</label>
-        <textarea id="jobContent" rows="3" placeholder="Nhập chi tiết công việc..."></textarea>
+    <div class="card-header">
+        <h4 class="mb-0">NHẬP BÁO CÁO CÔNG VIỆC</h4>
     </div>
+    <div class="card-body p-4">
+        <div class="mb-3">
+            <label class="form-label">Ngày thực hiện</label>
+            <input type="date" id="ngay" class="form-control">
+        </div>
 
-    <div class="form-group">
-        <label>Nhân sự thực hiện (Cột E):</label>
-        <input type="text" id="worker" placeholder="Tên nhân viên">
+        <div class="mb-3">
+            <label class="form-label">Nội dung công việc</label>
+            <textarea id="noidung" class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <select id="trangthai" class="form-select">
+                <option value="Hoàn thành">✅ Hoàn thành</option>
+                <option value="Đang thực hiện">🔵 Đang thực hiện</option>
+                <option value="Chưa bắt đầu">⚪ Chưa bắt đầu</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nhân sự thực hiện</label>
+            <input type="text" id="nhansu" class="form-control" placeholder="Tên nhân viên">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ghi chú</label>
+            <input type="text" id="ghichu" class="form-control" placeholder="Ghi chú thêm">
+        </div>
+
+        <button onclick="sendWorkReport()" id="btnSubmit" class="btn btn-primary btn-submit">
+            <span id="btnText">GỬI BÁO CÁO</span>
+            <span id="loading" class="spinner-border spinner-border-sm"></span>
+        </button>
     </div>
-
-    <div class="form-group">
-        <label>Trạng thái (Cột D):</label>
-        <select id="status">
-            <option value="Đang thực hiện">⏳ Đang thực hiện</option>
-            <option value="Đã hoàn thành">✅ Đã hoàn thành</option>
-            <option value="Chờ vật tư/Tạm dừng">🚫 Chờ vật tư/Tạm dừng</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Ghi chú (Cột F):</label>
-        <input type="text" id="note" placeholder="Thông tin thêm nếu có...">
-    </div>
-
-    <button onclick="sendReport()" id="btnSend">GỬI BÁO CÁO</button>
-    <div id="loading">⌛ Đang lưu vào hệ thống...</div>
 </div>
 
 <script>
-    // Dán link Web App (đuôi /exec) đã Deploy ở chế độ "Anyone" vào đây
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-
     function sendReport() {
-        const btn = document.getElementById('btnSend');
-        const load = document.getElementById('loading');
-        
-        // Lấy dữ liệu từ các ô nhập
-        const jobContent = document.getElementById('jobContent').value;
-        const worker = document.getElementById('worker').value;
-        const status = document.getElementById('status').value;
-        const note = document.getElementById('note').value;
+    const btn = document.getElementById('btnSend');
+    const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 
-        if(!jobContent || !worker) {
-            alert("Vui lòng điền đủ 'Nội dung' và 'Nhân sự thực hiện'!");
-            return;
-        }
+    // Lấy dữ liệu từ Form
+    const jobContent = document.getElementById('jobContent').value;
+    const worker = document.getElementById('worker').value;
+    const status = document.getElementById('status').value;
+    const note = document.getElementById('note').value;
 
-        btn.disabled = true;
-        load.style.display = "block";
+    if(!jobContent || !worker) return alert("Vui lòng điền nội dung và tên!");
 
-        // Sử dụng URLSearchParams để gửi dữ liệu dạng Form-Encoded (ổn định nhất cho GitHub)
-        const formData = new URLSearchParams();
-        formData.append('jobContent', jobContent);
-        formData.append('worker', worker);
-        formData.append('status', status);
-        formData.append('note', note);
+    btn.disabled = true;
+    btn.innerText = "Đang gửi...";
 
-        fetch(WEB_APP_URL, {
-            method: "POST",
-            mode: "no-cors", // Vượt qua chính sách bảo mật trình duyệt
-            cache: "no-cache",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: formData.toString()
-        })
-        .then(() => {
-            // Do mode no-cors không đọc được phản hồi, chúng ta giả định gửi đi là thành công
-            alert("🚀 Đã gửi báo cáo!");
-            document.getElementById('jobContent').value = "";
-            document.getElementById('note').value = "";
-        })
-        .catch(e => {
-            console.error(e);
-            alert("❌ Lỗi kết nối!");
-        })
-        .finally(() => {
-            btn.disabled = false;
-            load.style.display = "none";
-        });
-    }
+    // Đóng gói dữ liệu dạng URL-Encoded (Cực kỳ ổn định)
+    const params = new URLSearchParams();
+    params.append('jobContent', jobContent);
+    params.append('worker', worker);
+    params.append('status', status);
+    params.append('note', note);
+
+    fetch(G_URL, {
+        method: "POST",
+        mode: "no-cors", // Bắt buộc để không bị chặn bởi GitHub/CORS
+        cache: "no-cache",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: params.toString()
+    })
+    .then(() => {
+        // Lưu ý: no-cors luôn nhảy vào đây kể cả khi có lỗi, 
+        // nhưng dữ liệu sẽ vào Sheets nếu link App Script đúng.
+        alert("🚀 Đã phát lệnh gửi! Hãy kiểm tra Sheets ngay.");
+        document.getElementById('jobContent').value = "";
+        document.getElementById('note').value = "";
+    })
+    .catch(err => alert("Lỗi: " + err))
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerText = "GỬI BÁO CÁO";
+    });
+}
 </script>
 
 </body>
