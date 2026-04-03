@@ -3,168 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Bảo Trì Máy Móc</title>
+    <title>Báo Cáo Công Việc KLM</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4345/4345517.png">
     <style>
-        :root {
-            --primary: #1a73e8;
-            --success: #28a745;
-            --danger: #d32f2f;
-            --warning: #f9ab00;
-        }
-
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; background-color: #f1f3f4; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        :root { --primary: #1a73e8; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .card { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; margin: 0 0 20px 0; text-transform: uppercase; font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
         
-        h2 { color: var(--primary); text-align: center; margin-bottom: 25px; text-transform: uppercase; }
-
-        /* Ô tìm kiếm nổi bật */
-        .search-container { margin-bottom: 20px; padding: 15px; background: #fffde7; border-radius: 8px; border: 1px solid #ffe082; display: flex; align-items: center; gap: 10px; }
-        .search-input { flex: 1; padding: 12px; border: 2px solid var(--primary); border-radius: 6px; font-size: 16px; font-weight: bold; }
-
-        /* Form nhập liệu */
-        .form-section { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #e0e0e0; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 15px; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        .btn-save { background: var(--success); color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
-        .btn-save:hover { background: #218838; }
-
-        /* Bảng hiển thị */
-        .table-res { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 800px; }
-        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        tr:hover { background: #f1f8ff; }
-        tr.hidden { display: none; }
-
-        /* Badge trạng thái */
-        .status { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
-        .overdue { background: #fdecea; color: var(--danger); border: 1px solid #fad2cf; }
-        .ok { background: #e6f4ea; color: #1e7e34; border: 1px solid #ceead6; }
-
-        #loading { text-align: center; display: none; color: var(--primary); font-weight: bold; padding: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; font-size: 0.85rem; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 1.5px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.2s;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+        
+        button { 
+            width: 100%; padding: 16px; background: var(--primary); color: white; border: none; 
+            border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s;
+        }
+        button:hover { background: #1765cc; }
+        button:disabled { background: #bdc1c6; cursor: not-allowed; }
+        
+        #loading { text-align: center; margin-top: 15px; font-weight: bold; color: var(--primary); display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🛠️ Quản Lý Bảo Trì Thiết Bị</h2>
+<div class="card">
+    <h2>📝 BÁO CÁO CÔNG VIỆC</h2>
+    
+    <div class="form-group">
+        <label>Nội dung công việc (Cột C):</label>
+        <textarea id="jobContent" rows="3" placeholder="Nhập chi tiết công việc..."></textarea>
+    </div>
 
-    <div class="search-container">
-        <span>🔍 <b>TÌM KIẾM:</b></span>
-        <input type="text" id="searchInput" class="search-input" onkeyup="filterTable()" placeholder="Nhập Mã số hoặc Tên máy để lọc nhanh...">
+    <div class="form-group">
+        <label>Nhân sự thực hiện (Cột E):</label>
+        <input type="text" id="worker" placeholder="Tên nhân viên">
     </div>
-    <div id="loading">⌛ Đang xử lý dữ liệu...</div>
 
-    <div class="form-section">
-        <div class="form-grid">
-            <input type="text" id="mCode" placeholder="Mã số thiết bị">
-            <input type="text" id="mName" placeholder="Tên máy">
-            <input type="date" id="mDate" title="Ngày bảo trì gần nhất">
-            <input type="number" id="mCycle" placeholder="Chu kỳ (Ngày)">
-        </div>
-        <button class="btn-save" onclick="addMachine()">📥 LƯU VÀO GOOGLE SHEETS</button>
+    <div class="form-group">
+        <label>Trạng thái (Cột D):</label>
+        <select id="status">
+            <option value="Đang thực hiện">⏳ Đang thực hiện</option>
+            <option value="Đã hoàn thành">✅ Đã hoàn thành</option>
+            <option value="Chờ vật tư/Tạm dừng">🚫 Chờ vật tư/Tạm dừng</option>
+        </select>
     </div>
-    <div class="table-res">
-        <table id="machineTable">
-            <thead>
-                <tr>
-                    <th>Mã Số</th>
-                    <th>Tên Thiết Bị</th>
-                    <th>Ngày Bảo Trì Gần Nhất</th>
-                    <th>Chu Kỳ</th>
-                    <th>Ngày Bảo Trì Tiếp Theo</th>
-                    <th>Trạng Thái</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+
+    <div class="form-group">
+        <label>Ghi chú (Cột F):</label>
+        <input type="text" id="note" placeholder="Thông tin thêm nếu có...">
     </div>
+
+    <button onclick="sendReport()" id="btnSend">GỬI BÁO CÁO</button>
+    <div id="loading">⌛ Đang lưu vào hệ thống...</div>
 </div>
 
 <script>
+    // Dán link Web App (đuôi /exec) đã Deploy ở chế độ "Anyone" vào đây
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 
-    async function loadData() {
-        showLoading(true);
-        try {
-            const res = await fetch(WEB_APP_URL);
-            const data = await res.json();
-            renderTable(data);
-        } catch (e) { console.error(e); }
-        showLoading(false);
-    }
+    function sendReport() {
+        const btn = document.getElementById('btnSend');
+        const load = document.getElementById('loading');
+        
+        // Lấy dữ liệu từ các ô nhập
+        const jobContent = document.getElementById('jobContent').value;
+        const worker = document.getElementById('worker').value;
+        const status = document.getElementById('status').value;
+        const note = document.getElementById('note').value;
 
-    async function addMachine() {
-        const code = document.getElementById('mCode').value;
-        const name = document.getElementById('mName').value;
-        const lastDate = document.getElementById('mDate').value;
-        const cycle = document.getElementById('mCycle').value;
+        if(!jobContent || !worker) {
+            alert("Vui lòng điền đủ 'Nội dung' và 'Nhân sự thực hiện'!");
+            return;
+        }
 
-        if (!code || !name || !lastDate || !cycle) return alert("Vui lòng nhập đủ thông tin!");
+        btn.disabled = true;
+        load.style.display = "block";
 
-        showLoading(true);
-        const payload = { code, name, lastDate, cycle: parseInt(cycle) };
+        // Sử dụng URLSearchParams để gửi dữ liệu dạng Form-Encoded (ổn định nhất cho GitHub)
+        const formData = new URLSearchParams();
+        formData.append('jobContent', jobContent);
+        formData.append('worker', worker);
+        formData.append('status', status);
+        formData.append('note', note);
 
-        try {
-            await fetch(WEB_APP_URL, {
-                method: "POST",
-                redirect: "follow",
-                body: JSON.stringify(payload)
-            });
-            alert("Đã cập nhật thành công!");
-            location.reload();
-        } catch (e) { alert("Lỗi kết nối!"); }
-        showLoading(false);
-    }
-
-    function renderTable(data) {
-        const tbody = document.querySelector('#machineTable tbody');
-        tbody.innerHTML = '';
-        const now = new Date();
-        now.setHours(0,0,0,0);
-
-        data.forEach(row => {
-            // KHỚP CỘT THEO SHEET: 0:ID, 1:MaSo, 2:TenMay, 3:NgayGanNhat, 4:ChuKy
-            const code = row[1] || '';
-            const name = row[2] || '';
-            const lastDate = row[3];
-            const cycle = row[4] || 0;
-
-            if (!lastDate) return;
-
-            const dLast = new Date(lastDate);
-            const dNext = new Date(dLast);
-            dNext.setDate(dLast.getDate() + parseInt(cycle));
-const isOverdue = now > dNext;
-
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${code}</b></td>
-                    <td>${name}</td>
-                    <td>${dLast.toLocaleDateString('vi-VN')}</td>
-                    <td>${cycle} ngày</td>
-                    <td><b style="color:var(--primary)">${dNext.toLocaleDateString('vi-VN')}</b></td>
-                    <td>
-                        <span class="status ${isOverdue ? 'overdue' : 'ok'}">
-                            ${isOverdue ? '⚠️ CẦN BẢO TRÌ' : '✅ AN TOÀN'}
-                        </span>
-                    </td>
-                </tr>`;
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors", // Vượt qua chính sách bảo mật trình duyệt
+            cache: "no-cache",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: formData.toString()
+        })
+        .then(() => {
+            // Do mode no-cors không đọc được phản hồi, chúng ta giả định gửi đi là thành công
+            alert("🚀 Đã gửi báo cáo!");
+            document.getElementById('jobContent').value = "";
+            document.getElementById('note').value = "";
+        })
+        .catch(e => {
+            console.error(e);
+            alert("❌ Lỗi kết nối!");
+        })
+        .finally(() => {
+            btn.disabled = false;
+            load.style.display = "none";
         });
     }
-
-    function filterTable() {
-        const filter = document.getElementById("searchInput").value.toUpperCase();
-        const rows = document.querySelector("#machineTable tbody").getElementsByTagName("tr");
-        for (let i = 0; i < rows.length; i++) {
-            const txt = rows[i].innerText.toUpperCase();
-            rows[i].classList.toggle("hidden", !txt.includes(filter));
-        }
-    }
-
-    function showLoading(s) { document.getElementById('loading').style.display = s ? 'block' : 'none'; }
-
-    loadData();
 </script>
 
 </body>
