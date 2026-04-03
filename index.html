@@ -135,3 +135,37 @@
             const dLast = new Date(lastDate);
             const dNext = new Date(dLast);
             dNext.setDate(dLast.getDate() + parseInt(cycle));
+const isOverdue = now > dNext;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${code}</b></td>
+                    <td>${name}</td>
+                    <td>${dLast.toLocaleDateString('vi-VN')}</td>
+                    <td>${cycle} ngày</td>
+                    <td><b style="color:var(--primary)">${dNext.toLocaleDateString('vi-VN')}</b></td>
+                    <td>
+                        <span class="status ${isOverdue ? 'overdue' : 'ok'}">
+                            ${isOverdue ? '⚠️ CẦN BẢO TRÌ' : '✅ AN TOÀN'}
+                        </span>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    function filterTable() {
+        const filter = document.getElementById("searchInput").value.toUpperCase();
+        const rows = document.querySelector("#machineTable tbody").getElementsByTagName("tr");
+        for (let i = 0; i < rows.length; i++) {
+            const txt = rows[i].innerText.toUpperCase();
+            rows[i].classList.toggle("hidden", !txt.includes(filter));
+        }
+    }
+
+    function showLoading(s) { document.getElementById('loading').style.display = s ? 'block' : 'none'; }
+
+    loadData();
+</script>
+
+</body>
+</html>
