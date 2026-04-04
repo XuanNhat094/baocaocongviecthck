@@ -105,24 +105,20 @@
 
 </div>
 <script>
-    // Link API từ Google Apps Script của bạn
     const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
     let allData = [];
 
-    // Tự động điền ngày hôm nay khi vừa mở trang
     window.onload = function() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('ngay').value = today;
         document.getElementById('filterDate').value = today;
-        loadData(); // Tải dữ liệu ngay khi mở trang
+        loadData();
     };
 
-    // --- 1. HÀM GỬI BÁO CÁO MỚI ---
     function sendWorkReport() {
         const btn = document.getElementById('btnSubmit');
         const text = document.getElementById('btnText');
         const loader = document.getElementById('loadingSpinner');
-
         const noidung = document.getElementById('noidung').value;
         const nhansu = document.getElementById('nhansu').value;
 
@@ -137,7 +133,6 @@
         params.append('note', document.getElementById('ghichu').value);
         params.append('customDate', document.getElementById('ngay').value);
 
-        // Hiệu ứng đang gửi
         btn.disabled = true;
         text.innerText = "ĐANG GỬI...";
         loader.style.display = "inline-block";
@@ -152,7 +147,7 @@
             alert("✅ Đã gửi thành công!");
             document.getElementById('noidung').value = "";
             document.getElementById('ghichu').value = "";
-            loadData(); // Cập nhật lại danh sách bên dưới
+            loadData();
         })
         .catch(err => alert("❌ Lỗi: " + err))
         .finally(() => {
@@ -162,22 +157,18 @@
         });
     }
 
-    // --- 2. HÀM TẢI DỮ LIỆU TỪ SHEETS ---
     async function loadData() {
         const reportArea = document.getElementById('reportText');
         reportArea.value = "⏳ Đang tải dữ liệu...";
-
         try {
             const res = await fetch(G_URL);
             allData = await res.json();
-            filterData(); // Tải xong thì lọc theo ngày đang chọn
+            filterData();
         } catch (e) {
-            reportArea.value = "❌ Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng!";
-            console.error(e);
+            reportArea.value = "❌ Không thể tải dữ liệu.";
         }
     }
 
-    // --- 3. HÀM LỌC VÀ TẠO VĂN BẢN TXT (BỎ DẤU NGOẶC KÉP) ---
     function filterData() {
         const filterVal = document.getElementById('filterDate').value;
         const reportArea = document.getElementById('reportText');
@@ -187,18 +178,15 @@
             return;
         }
 
-        // Định dạng ngày hiển thị DD/MM/YYYY
         const d = filterVal.split('-');
         const displayDate = `${d[2]}/${d[1]}/${d[0]}`;
 
-        // Lọc dữ liệu theo ngày đã chọn
         const filtered = allData.filter(item => {
             if(!item.ngay) return false;
             const itemDate = new Date(item.ngay).toISOString().split('T')[0];
             return itemDate === filterVal;
         });
 
-        // Tạo nội dung văn bản để copy
         let content = `Báo cáo công việc ngày ${displayDate}\n`;
         content += `----------------------------------\n`;
 
@@ -208,38 +196,36 @@
             filtered.forEach(item => {
                 const nd = item.noidung || "";
                 const ns = item.nhansu || "";
-                const gc = item.ghichu || "";
-                // Định dạng: - Nội dung Nhân sự Ghi chú (Đã bỏ dấu ngoặc kép)
+                let gc = item.ghichu || "";
+                
+                // Nếu có ghi chú thì mới thêm dấu % vào sau
+                if (gc !== "") {
+                    gc = gc + "%";
+                }
+                
+                // Kết quả: - Nội dung Nhân sự Ghi chú%
                 content += `- ${nd} ${ns} ${gc}\n`;
             });
         }
-
         reportArea.value = content;
     }
 
-    // --- 4. HÀM SAO CHÉP NHANH ---
     function copyReport() {
         const copyText = document.getElementById("reportText");
-        
         if (!copyText.value || copyText.value.includes("Đang tải")) return;
 
         copyText.select();
-        copyText.setSelectionRange(0, 99999); // Hỗ trợ mobile
+        copyText.setSelectionRange(0, 99999);
 
         navigator.clipboard.writeText(copyText.value).then(() => {
-            // Hiệu ứng đổi màu nút khi thành công
             const btn = document.querySelector('button[onclick="copyReport()"]');
             const originalHTML = btn.innerHTML;
-            
             btn.innerHTML = "✅ Đã chép";
             btn.classList.replace('btn-primary', 'btn-success');
-            
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
                 btn.classList.replace('btn-success', 'btn-primary');
             }, 2000);
-        }).catch(err => {
-            alert("Lỗi khi sao chép: " + err);
         });
     }
 </script>
