@@ -88,6 +88,21 @@
             </table>
         </div>
     </div>-->
+    <div class="card-body">
+    <div class="mb-3">
+        <label class="form-label fw-bold">Chọn ngày báo cáo:</label>
+        <input type="date" id="filterDate" class="form-control" onchange="loadData()">
+    </div>
+
+    <div class="position-relative">
+        <button class="btn btn-sm btn-primary position-absolute end-0 top-0 m-2" onclick="copyReport()">
+            <i class="bi bi-clipboard"></i> Sao chép
+        </button>
+        <textarea id="reportText" class="form-control bg-light" rows="10" readonly 
+            style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap;"></textarea>
+    </div>
+</div>
+
 </div>
 
 <script>
@@ -135,7 +150,37 @@
             loader.style.display = "none";
         });
     }
+function displayData(data) {
+    const filterDate = document.getElementById('filterDate').value;
+    const reportText = document.getElementById('reportText');
+    
+    // 1. Tạo tiêu đề báo cáo
+    let content = `Báo cáo công việc ngày ${filterDate}\n`;
+    
+    // 2. Duyệt qua dữ liệu để tạo các dòng gạch đầu dòng
+    if (data.length === 0) {
+        content += "(Không có dữ liệu cho ngày này)";
+    } else {
+        data.forEach(item => {
+            content += `- "${item.noiDung}" "${item.nhanSu}" "${item.ghiChu}"\n`;
+        });
+    }
 
+    // 3. Đổ nội dung vào khung Textarea
+    reportText.value = content;
+}
+
+// Hàm xử lý nút Copy
+function copyReport() {
+    const copyText = document.getElementById("reportText");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // Cho điện thoại
+
+    navigator.clipboard.writeText(copyText.value).then(() => {
+        alert("Đã sao chép nội dung báo cáo!");
+    });
+}
+// đã thay dổi
     async function loadData() {
         try {
             const res = await fetch(G_URL);
