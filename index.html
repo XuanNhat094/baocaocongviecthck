@@ -109,23 +109,30 @@
     const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
     let allData = [];
 
-    document.getElementById('ngay').valueAsDate = new Date();
+    // Tự động lấy ngày hôm nay cho cả 2 ô nhập liệu và lọc
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('ngay').value = today;
+    document.getElementById('filterDate').value = today;
 
+    // --- 1. HÀM GỬI BÁO CÁO ---
     function sendWorkReport() {
         const btn = document.getElementById('btnSubmit');
         const text = document.getElementById('btnText');
         const loader = document.getElementById('loadingSpinner');
 
+        const noidung = document.getElementById('noidung').value;
+        const nhansu = document.getElementById('nhansu').value;
+
+        if(!noidung || !nhansu) {
+            return alert("Vui lòng nhập đầy đủ Nội dung và Nhân sự!");
+        }
+
         const params = new URLSearchParams();
-        params.append('jobContent', document.getElementById('noidung').value);
-        params.append('worker', document.getElementById('nhansu').value);
+        params.append('jobContent', noidung);
+        params.append('worker', nhansu);
         params.append('status', document.getElementById('trangthai').value);
         params.append('note', document.getElementById('ghichu').value);
         params.append('customDate', document.getElementById('ngay').value);
-
-        if(!document.getElementById('noidung').value || !document.getElementById('nhansu').value) {
-            return alert("Vui lòng nhập đầy đủ Nội dung và Nhân sự!");
-        }
 
         btn.disabled = true;
         text.innerText = "ĐANG GỬI...";
@@ -141,7 +148,7 @@
             alert("✅ Đã gửi thành công!");
             document.getElementById('noidung').value = "";
             document.getElementById('ghichu').value = "";
-            loadData();
+            loadData(); // Tải lại dữ liệu sau khi gửi
         })
         .catch(err => alert("Lỗi: " + err))
         .finally(() => {
@@ -150,85 +157,86 @@
             loader.style.display = "none";
         });
     }
-function displayData(data) {
-    const filterDate = document.getElementById('filterDate').value;
-    const reportText = document.getElementById('reportText');
-    
-    // 1. Tạo tiêu đề báo cáo
-    let content = `Báo cáo công việc ngày ${filterDate}\n`;
-    
-    // 2. Duyệt qua dữ liệu để tạo các dòng gạch đầu dòng
-    if (data.length === 0) {
-        content += "(Không có dữ liệu cho ngày này)";
-    } else {
-        data.forEach(item => {
-            content += `- "${item.noiDung}" "${item.nhanSu}" "${item.ghiChu}"\n`;
-        });
-    }
 
-    // 3. Đổ nội dung vào khung Textarea
-    reportText.value = content;
-}
-
-// Hàm xử lý nút Copy
-function copyReport() {
-    const copyText = document.getElementById("reportText");
-    copyText.select();
-    copyText.setSelectionRange(0, 99999); // Cho điện thoại
-
-    navigator.clipboard.writeText(copyText.value).then(() => {
-        alert("Đã sao chép nội dung báo cáo!");
-    });
-}
-// đã thay dổi
+    // --- 2. HÀM TẢI DỮ LIỆU TỪ GOOGLE SHEETS ---
     async function loadData() {
+        const reportArea = document.getElementById('reportText');
+        reportArea.value = "⏳ Đang tải dữ liệu, vui lòng đợi...";
+
         try {
             const res = await fetch(G_URL);
             allData = await res.json();
-            displayData(allData);
+            filterData(); // Sau khi tải xong thì lọc theo ngày đang chọn luôn
         } catch (e) {
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="6" class="text-danger">Lỗi tải dữ liệu</td></tr>`;
+            reportArea.value = "❌ Lỗi: Không thể kết nối với dữ liệu.";
+            console.error(e);
         }
     }
 
-    function displayData(data) {
-        const body = document.getElementById('tableBody');
-        body.innerHTML = "";
-        
-        // Đảo ngược để mới nhất lên đầu và lấy 20 mục
-        const displayRows = [...data].reverse().slice(0, 20);
-
-        displayRows.forEach(item => {
-            let dateStr = item.ngay ? new Date(item.ngay).toLocaleDateString('vi-VN') : "N/A";
-            let statusBadge = item.trangthai === 'Hoàn thành' ? 'bg-success' : 
-                              (item.trangthai === 'Đang thực hiện' ? 'bg-primary' : 'bg-secondary');
-            
-            body.innerHTML += `
-                <tr>
-                    <td>${item.stt || ""}</td>
-                    <td>${dateStr}</td>
-                    <td class="text-start">${item.noidung || ""}</td>
-                    <td><span class="badge ${statusBadge}">${item.trangthai || ""}</span></td>
-                    <td>${item.nhansu || ""}</td>
-                    <td class="text-muted small">${item.ghichu || ""}</td>
-                </tr>
-            `;
-        });
-    }
-
+    // --- 3. HÀM LỌC VÀ HIỂN THỊ DẠNG VĂN BẢN (TXT) ---
     function filterData() {
         const filterVal = document.getElementById('filterDate').value;
+        const reportArea = document.getElementById('reportText');
+        
         if (!filterVal) {
-            displayData(allData);
+            reportArea.value = "Vui lòng chọn ngày để xem báo cáo.";
             return;
         }
+
+        // Chuyển ngày từ YYYY-MM-DD sang DD/MM/YYYY để hiển thị cho đẹp
+        const dateParts = filterVal.split('-');
+        const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+
+        // Lọc dữ liệu theo ngày
         const filtered = allData.filter(item => {
             if(!item.ngay) return false;
-            return new Date(item.ngay).toISOString().split('T')[0] === filterVal;
+            // So sánh chuỗi ngày (YYYY-MM-DD)
+            const itemDate = new Date(item.ngay).toISOString().split('T')[0];
+            return itemDate === filterVal;
         });
-        displayData(filtered);
+
+        // Tạo nội dung văn bản
+        let content = `Báo cáo công việc ngày ${formattedDate}\n`;
+        content += `----------------------------------\n`;
+
+        if (filtered.length === 0) {
+            content += "(Không có dữ liệu cho ngày này)";
+        } else {
+            filtered.forEach(item => {
+                // Lưu ý: Tên cột phải khớp với JSON trả về (noidung, nhansu, ghichu)
+                const nd = item.noidung || "";
+                const ns = item.nhansu || "";
+                const gc = item.ghichu || "";
+                content += `- "${nd}" "${ns}" "${gc}"\n`;
+            });
+        }
+
+        reportArea.value = content;
     }
 
+    // --- 4. HÀM COPY ---
+    function copyReport() {
+        const copyText = document.getElementById("reportText");
+        if (!copyText.value || copyText.value.includes("Đang tải")) return;
+
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // Hỗ trợ mobile
+
+        navigator.clipboard.writeText(copyText.value).then(() => {
+            // Hiệu ứng đổi màu nút tạm thời để biết đã copy
+            const btn = document.querySelector('button[onclick="copyReport()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✅ Đã chép";
+            btn.classList.replace('btn-primary', 'btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.replace('btn-success', 'btn-primary');
+            }, 2000);
+        });
+    }
+
+    // Chạy tải dữ liệu khi vừa mở trang
     window.onload = loadData;
 </script>
 </body>
