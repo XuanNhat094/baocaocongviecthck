@@ -37,10 +37,10 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h4 class="mb-3">🔐 ĐĂNG NHẬP</h4>
-        <p class="text-muted small">Vui lòng nhập mã để tiếp tục</p>
-        <input type="password" id="accessCode" class="form-control mb-3" placeholder="Nhập mã pin...">
+        <p class="text-muted small">Vui lòng nhập mật khẩu để tiếp tục</p>
+        <input type="password" id="accessCode" class="form-control mb-3" placeholder="Nhập mật khẩu...">
         <button onclick="checkLogin()" class="btn btn-primary w-100">ĐĂNG NHẬP</button>
-        <p id="loginError" class="text-danger small mt-2" style="display:none;">Mã không đúng!</p>
+        <p id="loginError" class="text-danger small mt-2" style="display:none;">Mật khẩu không đúng!</p>
     </div>
 </div>
     
@@ -252,7 +252,7 @@
         });
     }
 
-const MY_SECRET_CODE = "0505"; 
+const MY_SECRET_CODE = "KLM0505"; 
 
 // Kiểm tra xem đã đăng nhập trước đó chưa
 if (localStorage.getItem("isLoggedIn") === "true") {
