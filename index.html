@@ -20,7 +20,16 @@
     </style>
 </head>
 <body>
-
+<div id="loginOverlay">
+    <div class="login-box">
+        <h4 class="mb-3">🔐 ĐĂNG NHẬP</h4>
+        <p class="text-muted small">Vui lòng nhập mã để tiếp tục</p>
+        <input type="password" id="accessCode" class="form-control mb-3" placeholder="Nhập mã pin...">
+        <button onclick="checkLogin()" class="btn btn-primary w-100">ĐĂNG NHẬP</button>
+        <p id="loginError" class="text-danger small mt-2" style="display:none;">Mã không đúng!</p>
+    </div>
+</div>
+    
 <div class="card">
     <div class="card-header">
         <h4 class="mb-0">NHẬP BÁO CÁO CÔNG VIỆC</h4>
@@ -228,6 +237,28 @@
             }, 2000);
         });
     }
+
+const MY_SECRET_CODE = "0505"; 
+
+// Kiểm tra xem đã đăng nhập trước đó chưa
+if (localStorage.getItem("isLoggedIn") === "true") {
+    document.getElementById("loginOverlay").style.display = "none";
+}
+
+function checkLogin() {
+    const inputCode = document.getElementById("accessCode").value;
+    const errorMsg = document.getElementById("loginError");
+
+    if (inputCode === MY_SECRET_CODE) {
+        // Lưu vào máy người dùng để lần sau không hỏi lại
+        localStorage.setItem("isLoggedIn", "true");
+        document.getElementById("loginOverlay").style.display = "none";
+    } else {
+        errorMsg.style.display = "block";
+        document.getElementById("accessCode").value = "";
+    }
+}
+
 </script>
 
 </body>
