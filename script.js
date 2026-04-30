@@ -142,3 +142,17 @@ function copyReport() {
         }, 2000);
     });
 }
+function updateProgress(val) {
+    // Cập nhật con số hiển thị trên nhãn (label)
+    document.getElementById('progressValue').innerText = val;
+}
+function syncRange(val) {
+    if (val > 100) val = 100;
+    if (val < 0) val = 0;
+    document.getElementById('progressRange').value = val;
+}
+
+// Khi kéo thanh trượt -> số trong ô input nhảy theo
+function syncInput(val) {
+    document.getElementById('ghichu').value = val;
+}
