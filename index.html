@@ -4,40 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Báo Cáo Công Việc THCK</title>
+	<link rel="icon" type="ico" href="icon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="icon.ico">
-    <style>
-        body { background-color: #f4f7f9; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { max-width: 650px; margin: auto; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        .card-header { background: #0d6efd; color: white; border-radius: 15px 15px 0 0 !important; text-align: center; padding: 15px; }
-        .btn-submit { width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; }
-        #loadingSpinner { display: none; }
-        .table-card { max-width: 950px; }
-        .badge { font-size: 0.85rem; }
-        /* Khung đăng nhập tràn màn hình */
-        #loginOverlay {
-         position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9999;
-}
-.login-box {
-    background: white; padding: 30px; border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    text-align: center; max-width: 350px; width: 100%;
-}
-
-    </style>
+    <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
+
 <div id="loginOverlay">
     <div class="login-box">
         <h4 class="mb-3">🔐 ĐĂNG NHẬP</h4>
-        <p class="text-muted small">Vui lòng nhập mật khẩu để tiếp tục</p>
+        <p class="text-muted small">Vui lòng nhập họ tên để tiếp tục báo cáo</p>
+        <input type="text" id="userNameInput" class="form-control mb-3" placeholder="Nhập tên của bạn...">
+		<p class="text-muted small">Vui lòng nhập mật khẩu để tiếp tục</p>
         <input type="password" id="accessCode" class="form-control mb-3" placeholder="Nhập mật khẩu...">
         <button onclick="checkLogin()" class="btn btn-primary w-100">ĐĂNG NHẬP</button>
         <p id="loginError" class="text-danger small mt-2" style="display:none;">Mật khẩu không đúng!</p>
@@ -46,7 +28,7 @@
     
 <div class="card">
     <div class="card-header">
-        <h4 class="mb-0">NHẬP BÁO CÁO CÔNG VIỆC</h4>
+        <h4 class="mb-0">BÁO CÁO CÔNG VIỆC BT-THCK</h4>
     </div>
     <div class="card-body p-4">
         <div class="mb-3">
@@ -62,7 +44,6 @@
             <select id="trangthai" class="form-select">
                 <option value="Hoàn thành">✅ Hoàn thành</option>
                 <option value="Đang thực hiện">🔵 Đang thực hiện</option>
-                <option value="Chưa bắt đầu">⚪ Chưa bắt đầu</option>
             </select>
         </div>
         <div class="mb-3">
@@ -70,8 +51,8 @@
             <input type="text" id="nhansu" class="form-control" placeholder="Tên nhân viên">
         </div>
         <div class="mb-3">
-            <label class="form-label">Ghi chú</label>
-            <input type="text" id="ghichu" class="form-control" placeholder="Ghi chú thêm">
+            <label class="form-label">Tiến độ</label>
+            <input type="text" id="ghichu" class="form-control" value="100">
         </div>
         <button onclick="sendWorkReport()" id="btnSubmit" class="btn btn-primary btn-submit">
             <span id="btnText">GỬI BÁO CÁO</span>
@@ -79,38 +60,6 @@
         </button>
     </div>
 </div>
-
-<!--<div class="card table-card"> 
-    <div class="card-header bg-success text-white">
-        <h4 class="mb-0">NỘI DUNG ĐÃ BÁO CÁO</h4>
-    </div>-->
-    <!--<div class="card-body">
-        <div class="row g-3 mb-3">
-            <div class="col-md-8">
-                <input type="date" id="filterDate" class="form-control" onchange="filterData()">
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-outline-secondary w-100" onclick="loadData()">Tải lại dữ liệu</button>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>STT</th>
-                        <th>Ngày</th>
-                        <th>Nội dung</th>
-                        <th>Trạng thái</th>
-                        <th>Nhân sự</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody" class="text-center">
-                    <tr><td colspan="6">Đang tải dữ liệu...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>-->
     <div class="card-body">
     <div class="mb-3">
         <label class="form-label fw-bold">Chọn ngày báo cáo:</label>
@@ -126,154 +75,7 @@
     </div>
 </div>
 
-</div>
-<script>
-    const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-    let allData = [];
-
-    window.onload = function() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('ngay').value = today;
-        document.getElementById('filterDate').value = today;
-        loadData();
-    };
-
-    function sendWorkReport() {
-        const btn = document.getElementById('btnSubmit');
-        const text = document.getElementById('btnText');
-        const loader = document.getElementById('loadingSpinner');
-        const noidung = document.getElementById('noidung').value;
-        const nhansu = document.getElementById('nhansu').value;
-
-        if(!noidung || !nhansu) {
-            return alert("⚠️ Vui lòng nhập đầy đủ Nội dung và Nhân sự!");
-        }
-
-        const params = new URLSearchParams();
-        params.append('jobContent', noidung);
-        params.append('worker', nhansu);
-        params.append('status', document.getElementById('trangthai').value);
-        params.append('note', document.getElementById('ghichu').value);
-        params.append('customDate', document.getElementById('ngay').value);
-
-        btn.disabled = true;
-        text.innerText = "ĐANG GỬI...";
-        loader.style.display = "inline-block";
-
-        fetch(G_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: params.toString(),
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        })
-        .then(() => {
-            alert("✅ Đã gửi thành công!");
-            document.getElementById('noidung').value = "";
-            document.getElementById('ghichu').value = "";
-            loadData();
-        })
-        .catch(err => alert("❌ Lỗi: " + err))
-        .finally(() => {
-            btn.disabled = false;
-            text.innerText = "GỬI BÁO CÁO";
-            loader.style.display = "none";
-        });
-    }
-
-    async function loadData() {
-        const reportArea = document.getElementById('reportText');
-        reportArea.value = "⏳ Đang tải dữ liệu...";
-        try {
-            const res = await fetch(G_URL);
-            allData = await res.json();
-            filterData();
-        } catch (e) {
-            reportArea.value = "❌ Không thể tải dữ liệu.";
-        }
-    }
-
-    function filterData() {
-        const filterVal = document.getElementById('filterDate').value;
-        const reportArea = document.getElementById('reportText');
-        
-        if (!filterVal) {
-            reportArea.value = "Vui lòng chọn ngày.";
-            return;
-        }
-
-        const d = filterVal.split('-');
-        const displayDate = `${d[2]}/${d[1]}/${d[0]}`;
-
-        const filtered = allData.filter(item => {
-            if(!item.ngay) return false;
-            const itemDate = new Date(item.ngay).toISOString().split('T')[0];
-            return itemDate === filterVal;
-        });
-
-        let content = `Báo cáo công việc ngày ${displayDate}\n`;
-        content += `----------------------------------\n`;
-
-        if (filtered.length === 0) {
-            content += "(Chưa có dữ liệu báo cáo cho ngày này)";
-        } else {
-            filtered.forEach(item => {
-                const nd = item.noidung || "";
-                const ns = item.nhansu || "";
-                let gc = item.ghichu || "";
-                
-                // Nếu có ghi chú thì mới thêm dấu % vào sau
-                if (gc !== "") {
-                    gc = gc + "%";
-                }
-                
-                // Kết quả: - Nội dung Nhân sự Ghi chú%
-                content += `- ${nd} (${ns}) ${gc}\n`;
-            });
-        }
-        reportArea.value = content;
-    }
-
-    function copyReport() {
-        const copyText = document.getElementById("reportText");
-        if (!copyText.value || copyText.value.includes("Đang tải")) return;
-
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-
-        navigator.clipboard.writeText(copyText.value).then(() => {
-            const btn = document.querySelector('button[onclick="copyReport()"]');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = "✅ Đã chép";
-            btn.classList.replace('btn-primary', 'btn-success');
-            setTimeout(() => {
-                btn.innerHTML = originalHTML;
-                btn.classList.replace('btn-success', 'btn-primary');
-            }, 2000);
-        });
-    }
-
-const MY_SECRET_CODE = "KLM0505"; 
-
-// Kiểm tra xem đã đăng nhập trước đó chưa
-if (localStorage.getItem("isLoggedIn") === "true") {
-    document.getElementById("loginOverlay").style.display = "none";
-}
-
-function checkLogin() {
-    const inputCode = document.getElementById("accessCode").value;
-    const errorMsg = document.getElementById("loginError");
-
-    if (inputCode === MY_SECRET_CODE) {
-        // Lưu vào máy người dùng để lần sau không hỏi lại
-        localStorage.setItem("isLoggedIn", "true");
-        document.getElementById("loginOverlay").style.display = "none";
-    } else {
-        errorMsg.style.display = "block";
-        document.getElementById("accessCode").value = "";
-    }
-}
-
-</script>
-
+<script src="script.js"></script>
+<div class="footer"><label >Copyright © 2026 Xuân Nhật. All rights reserved.</label></div>
 </body>
 </html>
