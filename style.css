@@ -24,7 +24,6 @@ body { background-color: #f4f7f9; padding: 20px; font-family: 'Segoe UI', Tahoma
     padding: 30px; 
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    text-align: center; 
     max-width: 400px; 
     width: 90%;
 }
