@@ -51,9 +51,16 @@
             <input type="text" id="nhansu" class="form-control" placeholder="Tên nhân viên">
         </div>
         <div class="mb-3">
-            <label class="form-label">Tiến độ</label>
-            <input type="text" id="ghichu" class="form-control" value="100">
-        </div>
+    		<label class="form-label">Tiến độ (%)</label>
+    		<div class="d-flex align-items-center gap-2">
+        	<input type="number" id="ghichu" class="form-control" 
+               min="0" max="100" value="100" 
+               style="width: 80px;" oninput="syncRange(this.value)">     
+        	<input type="range" id="progressRange" class="form-range" 
+               min="0" max="100" value="100" 
+               oninput="syncInput(this.value)">
+    </div>
+</div>
         <button onclick="sendWorkReport()" id="btnSubmit" class="btn btn-primary btn-submit">
             <span id="btnText">GỬI BÁO CÁO</span>
             <span id="loadingSpinner" class="spinner-border spinner-border-sm"></span>
