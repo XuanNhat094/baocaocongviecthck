@@ -2,6 +2,14 @@ body { background-color: #f4f7f9; padding: 20px; font-family: 'Segoe UI', Tahoma
         .card { max-width: 650px; margin: auto; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 25px; }
         .card-header { background: #0d6efd; color: white; border-radius: 15px 15px 0 0 !important; text-align: center; padding: 15px; }
         .btn-submit { width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; }
+		.btn-submit:hover {
+    width: 100%;
+    padding: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    color: #0D6EFD;
+}
         #loadingSpinner { display: none; }
         .table-card { max-width: 950px; }
         .badge { font-size: 0.85rem; }
@@ -43,6 +51,8 @@ body { background-color: #f4f7f9; padding: 20px; font-family: 'Segoe UI', Tahoma
 .btn-success {
     background-color: #28a745 !important;
     border-color: #28a745 !important;
+    -webkit-box-shadow: 0px 0px;
+    box-shadow: 0px 0px;
 }
 
 /* Khoảng cách các thành phần */
@@ -65,4 +75,33 @@ body { background-color: #f4f7f9; padding: 20px; font-family: 'Segoe UI', Tahoma
     color: #FFFFFF;
     font-style: italic;
     font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, sans-serif;
+}
+.form-range {
+    width: 100%;
+    height: 1.5rem;
+    padding: 0;
+    background-color: transparent;
+    appearance: none;
+}
+
+.form-range:focus {
+    outline: none;
+}
+.gap-2 {
+    gap: 0.5rem !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+#progressRange {
+    flex-grow: 1; /* Thanh trượt sẽ chiếm hết phần không gian còn lại */
+    cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
