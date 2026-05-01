@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Bảo Trì KLM-THCK</title>
+    <link rel="icon" type="ico" href="icon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="manifest" href="JS/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="icon.ico">
+	<link href="CSS/style-2.css" rel="stylesheet" type="text/css">
+	<link href="CSS/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<!-- Nút mở menu -->
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+<!-- Nội dung Menu ẩn -->
+<div id="sideMenu" class="side-menu">
+    <button class="close-btn" onclick="toggleMenu()">✘</button>
+    <div class="menu-content">
+        <h5 class="text-white mb-4">DANH MỤC</h5>
+        <a href="index.html" onclick="toggleMenu()">🏠 Trang chủ</a>
+        <a href="danh-muc-thiet-bi.html" onclick="loadData(); toggleMenu()">➥ Danh mục thiết bị</a>
+		<a href="bao-tri-dinh-ky.html" onclick="loadData(); toggleMenu()">➥ Bảo trì định kỳ</a>
+        <a href="#" onclick="window.location.reload()">➥ Tải lại trang</a>
+        <hr class="text-white">
+        <a href="index.html" onclick="localStorage.removeItem('isLoggedIn'); location.reload();" class="text-danger">🚪 Đăng xuất</a>
+    </div>
+</div>
+
+<div class="container">
+        <div class="card-header">
+        <h4 class="mb-0">DANH MỤC THIẾT BỊ THCK</h4>
+    </div>     
+        
+    <div id="loading">⌛ Đang xử lý dữ liệu...</div>
+
+    <div class="control-panel">
+        <input type="text" id="searchInput" class="search-input" onkeyup="filterByText()" placeholder="🔍 Tìm nhanh Mã số hoặc Tên máy...">
+        <div class="filter-group">
+            <button class="filter-btn" style="background:#dc3545" onclick="filterByStatus('all')">Tất cả thiết bị</button>
+        </div>
+    </div>
+
+    <div class="table-res">
+        <table id="machineTable">
+            <thead>
+                <tr>
+					<th>STT</th>
+                    <th>Tên Thiết Bị</th>
+                    <th>Mã Số Thiết Bị</th>
+                    <th>Hạn Bảo Hành</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<script src="JS/script-2.js"></script>
+<script src="JS/script.js"></script>
+<div class="footer"><label >Copyright © 2026 Xuan Nhat. All rights reserved.</label></div>
+</body>
+</html>
