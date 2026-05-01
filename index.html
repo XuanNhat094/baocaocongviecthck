@@ -68,34 +68,32 @@
     </div>
 </div>
     <div class="card-body">
+    <!-- 1. Ô chọn ngày báo cáo -->
     <div class="mb-3">
         <label class="form-label fw-bold">Chọn ngày báo cáo:</label>
         <input type="date" id="filterDate" class="form-control" onchange="loadData()">
     </div>
 
-	<div class="position-relative">
-    <div class="position-absolute end-0 top-0 m-2 d-flex gap-2">
-        <!-- Nút Làm mới (Không hiện thông báo) -->
-        <button class="btn btn-sm btn-outline-secondary" onclick="loadData()">
-             🔄 Làm mới
-        </button>
-        <!-- Nút Sao chép -->
-        <button class="btn btn-sm btn-primary" onclick="copyReport()">
-            Sao chép
-        </button>
+    <!-- 2. Nhóm nút Làm mới và Sao chép (Nằm dưới ngày và trên báo cáo) -->
+    <div class="row g-2 mb-3">
+        <div class="col-6">
+            <button class="btn btn-outline-secondary w-100" onclick="loadData()">
+                🔄 Làm mới
+            </button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-primary w-100" onclick="copyReport()">
+                📋 Sao chép
+            </button>
+        </div>
     </div>
-    <textarea id="reportText" class="form-control bg-light" rows="10" readonly 
-              style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap;"></textarea>
-	</div>	
-    <!--<div class="position-relative">
-        <button class="btn btn-sm btn-primary position-absolute end-0 top-0 m-2" onclick="copyReport()">
-            <i class="bi bi-clipboard"></i> Sao chép
-        </button>
-        <textarea id="reportText" class="form-control bg-light" rows="10" readonly 
-            style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap;"></textarea>
-    </div>-->
-</div>
 
+    <!-- 3. Ô hiển thị nội dung báo cáo -->
+    <div class="report-container">
+        <textarea id="reportText" class="form-control bg-light" rows="12" readonly 
+                  style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; font-size: 14px;"></textarea>
+    </div>
+</div>
 <script src="script.js"></script>
 <div class="footer"><label >Copyright © 2026 Xuan Nhat. All rights reserved.</label></div>
 </body>
