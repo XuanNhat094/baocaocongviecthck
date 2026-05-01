@@ -105,3 +105,25 @@ input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+/* Đảm bảo ô báo cáo không bị các nút bấm đè lên */
+.report-container {
+    position: relative;
+    width: 100%;
+}
+
+#reportText {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px;
+    line-height: 1.5;
+    resize: none; /* Không cho người dùng kéo giãn lung tung */
+}
+
+/* Tối ưu nút bấm trên điện thoại */
+.btn {
+    height: 45px; /* Làm nút cao lên một chút để dễ bấm bằng tay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
