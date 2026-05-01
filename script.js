@@ -1,22 +1,26 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-const MY_SECRET_CODE = "KLM2026"; 
-let allData = [];
+// --- CẤU HÌNH HỆ THỐNG ---
+const MY_SECRET_CODE = "KLM0505"; // Đổi mã PIN tại đây
+const LOGIN_VERSION = "2026.05.01"; // CHỈ CẦN ĐỔI SỐ NÀY ĐỂ RESET TẤT CẢ THIẾT BỊ
 
-// --- QUẢN LÝ ĐĂNG NHẬP---
 window.onload = function() {
-    if (localStorage.getItem("isLoggedIn") === "true") {
-        const loginOverlay = document.getElementById("loginOverlay");
-        if(loginOverlay) loginOverlay.style.display = "none";
+    // Lấy phiên bản đăng nhập đã lưu trên máy người dùng
+    const savedVersion = localStorage.getItem("loginVersion");
+
+    // Nếu phiên bản trên máy khách khác với phiên bản hiện tại trong code -> RESET
+    if (savedVersion !== LOGIN_VERSION) {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("reportUser");
+        // Có thể xóa thêm các dữ liệu khác nếu cần
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const ngayInput = document.getElementById('ngay');
-    const filterInput = document.getElementById('filterDate');
-    
-    if(ngayInput) ngayInput.value = today;
-    if(filterInput) filterInput.value = today;
-    
-    loadData();
+    // Kiểm tra trạng thái sau khi đã lọc phiên bản
+    if (localStorage.getItem("isLoggedIn") === "true") {
+        const loginOverlay = document.getElementById("loginOverlay");
+        if (loginOverlay) loginOverlay.style.display = "none";
+    }
+
+    // ... các phần xử lý thời gian và loadData giữ nguyên ...
 };
 
 function checkLogin() {
@@ -25,8 +29,11 @@ function checkLogin() {
     const errorMsg = document.getElementById("loginError");
 
     if (inputCode === MY_SECRET_CODE && nameInput !== "") {
+        // Khi đăng nhập thành công, lưu cả trạng thái và phiên bản hiện tại
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("reportUser", nameInput);
+        localStorage.setItem("loginVersion", LOGIN_VERSION); // Lưu dấu vân tay phiên bản
+        
         document.getElementById("loginOverlay").style.display = "none";
     } else {
         errorMsg.innerText = nameInput === "" ? "Vui lòng nhập tên người báo cáo!" : "Mã PIN không đúng!";
