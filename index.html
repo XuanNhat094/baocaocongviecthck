@@ -73,13 +73,27 @@
         <input type="date" id="filterDate" class="form-control" onchange="loadData()">
     </div>
 
-    <div class="position-relative">
+	<div class="position-relative">
+    <div class="position-absolute end-0 top-0 m-2 d-flex gap-2">
+        <!-- Nút Làm mới (Không hiện thông báo) -->
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadData()">
+             🔄 Làm mới
+        </button>
+        <!-- Nút Sao chép -->
+        <button class="btn btn-sm btn-primary" onclick="copyReport()">
+            Sao chép
+        </button>
+    </div>
+    <textarea id="reportText" class="form-control bg-light" rows="10" readonly 
+              style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap;"></textarea>
+	</div>	
+    <!--<div class="position-relative">
         <button class="btn btn-sm btn-primary position-absolute end-0 top-0 m-2" onclick="copyReport()">
             <i class="bi bi-clipboard"></i> Sao chép
         </button>
         <textarea id="reportText" class="form-control bg-light" rows="10" readonly 
             style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap;"></textarea>
-    </div>
+    </div>-->
 </div>
 
 <script src="script.js"></script>
