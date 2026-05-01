@@ -1,5 +1,5 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-const MY_SECRET_CODE = "KLM1505"; 
+const MY_SECRET_CODE = "KLM2026"; 
 let allData = [];
 
 // --- QUẢN LÝ ĐĂNG NHẬP---
