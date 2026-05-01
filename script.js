@@ -1,26 +1,35 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
+
 // --- CẤU HÌNH HỆ THỐNG ---
-const MY_SECRET_CODE = "KLM0505"; // Đổi mã PIN tại đây
-const LOGIN_VERSION = "2026.05.01"; // CHỈ CẦN ĐỔI SỐ NÀY ĐỂ RESET TẤT CẢ THIẾT BỊ
+const MY_SECRET_CODE = "KLM2026"; 
+const LOGIN_VERSION = "2026.05.01"; 
+let allData = [];
 
 window.onload = function() {
-    // Lấy phiên bản đăng nhập đã lưu trên máy người dùng
+    // 1. QUẢN LÝ ĐĂNG NHẬP
     const savedVersion = localStorage.getItem("loginVersion");
-
-    // Nếu phiên bản trên máy khách khác với phiên bản hiện tại trong code -> RESET
     if (savedVersion !== LOGIN_VERSION) {
         localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("reportUser");
-        // Có thể xóa thêm các dữ liệu khác nếu cần
     }
 
-    // Kiểm tra trạng thái sau khi đã lọc phiên bản
     if (localStorage.getItem("isLoggedIn") === "true") {
         const loginOverlay = document.getElementById("loginOverlay");
         if (loginOverlay) loginOverlay.style.display = "none";
     }
 
-    // ... các phần xử lý thời gian và loadData giữ nguyên ...
+    // 2. TỰ ĐỘNG CHỌN NGÀY HÔM NAY (Theo giờ địa phương Việt Nam)
+    const now = new Date();
+    const today = now.toLocaleDateString('sv-SE'); // Trả về dạng YYYY-MM-DD chuẩn xác
+
+    const ngayInput = document.getElementById('ngay');
+    const filterInput = document.getElementById('filterDate');
+
+    if (ngayInput) ngayInput.value = today;
+    if (filterInput) filterInput.value = today;
+
+    // 3. TẢI DỮ LIỆU
+    loadData();
 };
 
 function checkLogin() {
@@ -29,11 +38,9 @@ function checkLogin() {
     const errorMsg = document.getElementById("loginError");
 
     if (inputCode === MY_SECRET_CODE && nameInput !== "") {
-        // Khi đăng nhập thành công, lưu cả trạng thái và phiên bản hiện tại
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("reportUser", nameInput);
-        localStorage.setItem("loginVersion", LOGIN_VERSION); // Lưu dấu vân tay phiên bản
-        
+        localStorage.setItem("loginVersion", LOGIN_VERSION);
         document.getElementById("loginOverlay").style.display = "none";
     } else {
         errorMsg.innerText = nameInput === "" ? "Vui lòng nhập tên người báo cáo!" : "Mã PIN không đúng!";
@@ -59,9 +66,11 @@ function sendWorkReport() {
     const text = document.getElementById('btnText');
     const loader = document.getElementById('loadingSpinner');
     
-    const noidung = document.getElementById('noidung').value;
-    const nhansu = document.getElementById('nhansu').value;
+    const noidung = document.getElementById('noidung').value.trim();
+    const nhansu = document.getElementById('nhansu').value.trim();
     const reporter = localStorage.getItem("reportUser") || "Ẩn danh";
+    const ngayReport = document.getElementById('ngay').value;
+    const tienDo = document.getElementById('ghichu').value;
 
     if(!noidung || !nhansu) {
         return alert("⚠️ Vui lòng nhập đầy đủ Nội dung và Nhân sự!");
@@ -71,10 +80,11 @@ function sendWorkReport() {
     params.append('jobContent', noidung);
     params.append('worker', nhansu);
     params.append('status', document.getElementById('trangthai').value);
-    params.append('note', document.getElementById('ghichu').value);
-    params.append('customDate', document.getElementById('ngay').value);
+    params.append('note', tienDo);
+    params.append('customDate', ngayReport);
     params.append('reporter', reporter);
 
+    // Hiệu ứng chờ
     btn.disabled = true;
     text.innerText = "ĐANG GỬI...";
     loader.style.display = "inline-block";
@@ -87,9 +97,21 @@ function sendWorkReport() {
     })
     .then(() => {
         alert("✅ Đã gửi thành công!");
+        
+        // CẬP NHẬT NHANH: Thêm dữ liệu vào danh sách hiện tại mà không cần tải lại trang
+        const newEntry = {
+            ngay: ngayReport,
+            noidung: noidung,
+            nhansu: nhansu,
+            ghichu: tienDo
+        };
+        allData.unshift(newEntry); // Đẩy lên đầu danh sách
+
+        // Reset ô nhập
         document.getElementById('noidung').value = "";
-        document.getElementById('ghichu').value = "";
-        loadData();
+        
+        // Cập nhật lại vùng hiển thị báo cáo ngay lập tức
+        filterData();
     })
     .catch(err => alert("❌ Lỗi: " + err))
     .finally(() => {
@@ -108,10 +130,10 @@ function filterData() {
     const d = filterVal.split('-');
     const displayDate = `${d[2]}/${d[1]}/${d[0]}`;
 
+    // TỐI ƯU: Lọc bằng chuỗi (substring) nhanh hơn dùng đối tượng Date
     const filtered = allData.filter(item => {
         if(!item.ngay) return false;
-        const itemDate = new Date(item.ngay).toISOString().split('T')[0];
-        return itemDate === filterVal;
+        return item.ngay.substring(0, 10) === filterVal;
     });
 
     let content = `Báo cáo công việc ngày ${displayDate}\n`;
@@ -125,19 +147,18 @@ function filterData() {
             const ns = item.nhansu || "";
             let gc = item.ghichu || "";
             if (gc !== "") gc = gc + "%";
-            content += `- ${nd} (${ns}) ${gc}\n`;
+            content += `- ${nd} (${ns})${gc}\n`;
         });
     }
     reportArea.value = content;
 }
 
+// --- TIỆN ÍCH ---
 function copyReport() {
     const copyText = document.getElementById("reportText");
     if (!copyText.value || copyText.value.includes("Đang tải")) return;
 
     copyText.select();
-    copyText.setSelectionRange(0, 99999);
-
     navigator.clipboard.writeText(copyText.value).then(() => {
         const btn = document.querySelector('button[onclick="copyReport()"]');
         const originalHTML = btn.innerHTML;
@@ -149,17 +170,21 @@ function copyReport() {
         }, 2000);
     });
 }
-function updateProgress(val) {
-    // Cập nhật con số hiển thị trên nhãn (label)
-    document.getElementById('progressValue').innerText = val;
-}
+
 function syncRange(val) {
-    if (val > 100) val = 100;
-    if (val < 0) val = 0;
-    document.getElementById('progressRange').value = val;
+    let v = parseInt(val);
+    if (v > 100) v = 100;
+    if (v < 0 || isNaN(v)) v = 0;
+    document.getElementById('progressRange').value = v;
 }
 
-// Khi kéo thanh trượt -> số trong ô input nhảy theo
 function syncInput(val) {
     document.getElementById('ghichu').value = val;
+}
+// Hàm chỉ làm mới vùng nội dung báo cáo
+function resetReportArea() {
+    const reportArea = document.getElementById('reportText');
+    if (reportArea) {
+        reportArea.value = ""; 
+    }
 }
