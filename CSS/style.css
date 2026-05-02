@@ -14,6 +14,29 @@ body { background-color: #f4f7f9; padding: 20px; font-family: 'Segoe UI', Tahoma
         .table-card { max-width: 950px; }
         .badge { font-size: 0.85rem; }
 /* Giao diện đăng nhập tràn màn hình */
+/* Đảm bảo giao diện không bị co giãn lạ trên iPhone */
+html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt hơn trên iOS */
+}
+
+/* Fix lỗi font chữ tự động to nhỏ trên Safari */
+body {
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Đảm bảo bảng có thể cuộn ngang nếu tên thiết bị quá dài */
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Thêm khoảng trống ở dưới cùng để thanh điều hướng iPhone không che mất Footer */
+body {
+    padding-bottom: env(safe-area-inset-bottom);
+}
 #loginOverlay {
     position: fixed;
     top: 0; 
