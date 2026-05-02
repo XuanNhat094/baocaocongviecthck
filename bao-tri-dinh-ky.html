@@ -22,14 +22,15 @@
     <button class="close-btn" onclick="toggleMenu()">✘</button>
     <div class="menu-content">
         <h5 class="text-white mb-4">DANH MỤC</h5>
-        <a href="index.html" onclick="toggleMenu()">➥ Báo cáo công việc</a>
+        <a href="index.html" onclick="toggleMenu()">➥ Báo cáo công việc</a>       
         <a href="danh-muc-thiet-bi.html" onclick="loadData(); toggleMenu()">➥ Danh mục thiết bị</a>
-		<a href="bao-tri-dinh-ky.html" onclick="loadData(); toggleMenu()">➥ Bảo trì định kỳ</a>
+        <a href="bao-tri-dinh-ky.html" onclick="loadData(); toggleMenu()">➥ Bảo trì định kỳ</a>
         <a href="#" onclick="window.location.reload()">➥ Tải lại trang</a>
         <hr class="text-white">
+		<a href="#" onclick="changePassword(); toggleMenu()">🔑 Đổi mã PIN</a>
         <a href="index.html" onclick="localStorage.removeItem('isLoggedIn'); location.reload();" class="text-danger">🚪 Đăng xuất</a>
     </div>
-	</div>
+</div>
 <div class="container">
     <div class="card-header">
         <h4 class="mb-0">DANH MỤC BẢO TRÌ THIẾT BỊ THCK</h4>

@@ -1,7 +1,7 @@
 :root { --primary: #1a73e8; --success: #28a745; --danger: #d32f2f; --warning: #f9ab00; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 15px; background-color: #f1f3f4; }
         .container {
-    max-width: 1000px;
+    max-width: 1000px !important;
     margin: auto;
     background: white;
     padding: 20px;
@@ -17,15 +17,31 @@
         .table-res { overflow-x: auto; margin-top: 10px; max-height: 70vh; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; position: sticky; top: 0; z-index: 10; }
-        td { padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+        td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+    min-width: 120px;
+}
         tr:nth-child(even) { background-color: #f9f9f9; }
         tr.hidden { display: none; }
         .status { padding: 5px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; }
-        .st-danger { background: #fdecea; color: var(--danger); }
-        .st-warning { background: #fff9c4; color: #827717; }
-        .st-success { background: #e6f4ea; color: #1e7e34; }
+        .st-danger {
+    background: #fdecea;
+    color: var(--danger);
+    min-width: 100px;
+}
+        .st-warning {
+    background: #fff9c4;
+    color: #827717;
+    min-width: 100px;
+}
+        .st-success {
+    background: #e6f4ea;
+    color: #1e7e34;
+    min-width: 100px;
+}
         .update-box { display: flex; gap: 5px; align-items: center; }
         .date-input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
         .btn-up { background: var(--primary); color: white; border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
         #loading { text-align: center; display: none; color: var(--primary); font-weight: bold; padding: 10px; }
-
