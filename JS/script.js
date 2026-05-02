@@ -1,5 +1,5 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-const LOGIN_VERSION = "2026.05.01"; 
+const LOGIN_VERSION = "2026.05.02"; 
 
 let allData = [];
 let db_accounts = {}; 
