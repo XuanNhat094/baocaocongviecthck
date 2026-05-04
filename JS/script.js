@@ -1,18 +1,17 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
-const LOGIN_VERSION = "2026.05.05"; 
+const LOGIN_VERSION = "2026.05.01"; 
 
 let allData = [];
 let db_accounts = {}; 
 
 window.onload = function() {
-    // 1. Khôi phục danh sách tài khoản từ cache để hiển thị ngay khi mở trang
+
     const cachedAcc = localStorage.getItem("cached_accounts");
     if (cachedAcc) {
         db_accounts = JSON.parse(cachedAcc);
         renderUserSelect();
     }
 
-    // 2. Kiểm tra phiên bản đăng nhập
     const savedVersion = localStorage.getItem("loginVersion");
     if (savedVersion !== LOGIN_VERSION) {
         localStorage.removeItem("isLoggedIn");
@@ -24,18 +23,15 @@ window.onload = function() {
         if (loginOverlay) loginOverlay.style.display = "none";
     }
 
-    // 3. Thiết lập ngày mặc định (YYYY-MM-DD)
     const today = new Date().toLocaleDateString('sv-SE'); 
     ['ngay', 'filterDate'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = today;
     });
 
-    // 4. Tải dữ liệu từ server
     loadData();
 };
 
-/** --- HỆ THỐNG TÀI KHOẢN --- **/
 
 function renderUserSelect() {
     const select = document.getElementById("userNameInput");
@@ -82,7 +78,6 @@ async function changePassword() {
 
     if (!confirm(`Xác nhận đổi mã PIN thành: ${newPass}?`)) return;
 
-    // SỬ DỤNG URLSearchParams để GS nhận diện qua e.parameter
     const formData = new URLSearchParams();
     formData.append('action', 'changePassword');
     formData.append('username', user);
@@ -104,7 +99,6 @@ async function changePassword() {
     }
 }
 
-/** --- XỬ LÝ BÁO CÁO --- **/
 
 async function loadData() {
     const reportArea = document.getElementById('reportText');
@@ -138,7 +132,6 @@ function sendWorkReport() {
 
     if(!noidung || !nhansu) return alert("⚠️ Vui lòng nhập Nội dung và Nhân sự!");
 
-    // SỬ DỤNG URLSearchParams ĐỂ GS KHÔNG GHI NHẦM SHEET
     const formData = new URLSearchParams();
     formData.append('jobContent', noidung);
     formData.append('worker', nhansu);
@@ -191,7 +184,6 @@ function filterData() {
     reportArea.value = content;
 }
 
-/** --- UI HELPERS --- **/
 
 function copyReport() {
     const copyText = document.getElementById("reportText");

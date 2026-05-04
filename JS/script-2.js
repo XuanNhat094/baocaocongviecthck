@@ -31,8 +31,8 @@ function renderTable(data) {
     const todayTime = today.getTime();
 
     const rowsHtml = data.map(row => {
-        const [id, code, name, lastDateRaw, cycleStr, sdate] = row;
-        const cycle = parseInt(cycleStr);
+        const [id, code, name, lastDateRaw, nextPlanStr, sdate] = row;
+        const cycle = parseInt(sdate);
 
         let stText1 = "Không xác định";
         let stClass1 = "st-warning"; 
@@ -63,7 +63,7 @@ function renderTable(data) {
     }).join('');
 
     dom.tbody.innerHTML = rowsHtml;
-} // <--- LỖI CỦA BẠN NẰM Ở ĐÂY: THIẾU DẤU ĐÓNG NGOẶC NÀY
+} 
 
 function filterByText() {
     if (!dom.tbody) return;

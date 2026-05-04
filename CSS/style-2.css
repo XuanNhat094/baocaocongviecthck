@@ -1,12 +1,20 @@
-:root { --primary: #1a73e8; --success: #28a745; --danger: #d32f2f; --warning: #f9ab00; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 15px; background-color: #f1f3f4; }
+:root { --primary: #1a73e8; --success: #28a745; --danger: #d32f2f; --warning: #f9ab00; --today: #0d6efd;}
+        body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    margin: 0;
+    background-color: #f1f3f4;
+}
         .container {
     max-width: 1000px !important;
     margin: auto;
     background: white;
-    padding: 20px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-bottom: 45px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-height: 100%;
 }
         h2 { color: var(--primary); text-align: center; text-transform: uppercase; font-size: 1.1rem; }
         h3 { color: var(--primary); text-align: center; text-transform: uppercase; font-size: 0.8rem; font-style: italic; }
@@ -16,7 +24,17 @@
         .filter-btn { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; font-size: 12px; }
         .table-res { overflow-x: auto; margin-top: 10px; max-height: 70vh; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 13px; position: sticky; top: 0; z-index: 10; }
+        th {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    min-width: 150px;
+}
         td {
     padding: 10px 12px;
     border-bottom: 1px solid #eee;
@@ -41,7 +59,7 @@
     color: #1e7e34;
     min-width: 100px;
 }
-        .update-box { display: flex; gap: 5px; align-items: center; }
+      .update-box { display: flex; gap: 5px; align-items: center; }
         .date-input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
         .btn-up { background: var(--primary); color: white; border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
         #loading { text-align: center; display: none; color: var(--primary); font-weight: bold; padding: 10px; }

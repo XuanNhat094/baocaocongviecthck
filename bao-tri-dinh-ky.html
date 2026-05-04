@@ -14,10 +14,9 @@
 	<link href="CSS/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-	<!-- Nút mở menu -->
+
 <button class="menu-toggle" onclick="toggleMenu()">☰</button>
 
-<!-- Nội dung Menu ẩn -->
 <div id="sideMenu" class="side-menu">
     <button class="close-btn" onclick="toggleMenu()">✘</button>
     <div class="menu-content">
@@ -44,6 +43,8 @@
             <button class="filter-btn" style="background:var(--danger)" onclick="filterByStatus('CẦN BẢO TRÌ')">Cần bảo trì</button>
             <button class="filter-btn" style="background:var(--warning); color:#333" onclick="filterByStatus('SẮP ĐẾN HẠN')">Sắp đến hạn</button>
             <button class="filter-btn" style="background:var(--success)" onclick="filterByStatus('AN TOÀN')">An toàn</button>
+			<button class="filter-btn" style="background:var(--today)" onclick="filterTodayDone()">Hôm nay
+</button>
         </div>
     </div>
 
