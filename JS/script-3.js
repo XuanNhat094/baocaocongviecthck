@@ -57,7 +57,7 @@ function renderTable(data) {
             stText = "AN TOÀN";
             stClass = "st-success";
         } 
-        else if (lastTime > nextTime) {
+        else if (lastTime <= nextTime) {
             stText = "AN TOÀN";
             stClass = "st-success";
         }
