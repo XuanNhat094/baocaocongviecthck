@@ -44,7 +44,7 @@ function renderTable(data) {
         const lastTime = getTimestamp(lastDateStr);
         
         const remainDays = Math.round((nextTime - todayTime) / 86400000);
-        const remainDayd = Math.round((lastDateStr - todayTime) / 86400000);
+        const remainDayd = Math.round((todayTime - lastDateStr) / 86400000);
         let lastDateValue = "";
         if (lastDateStr) {
             const d = new Date(lastTime);
