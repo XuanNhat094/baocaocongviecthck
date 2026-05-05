@@ -44,7 +44,7 @@ function renderTable(data) {
         const lastTime = getTimestamp(lastDateStr);
         
         const remainDays = Math.round((nextTime - todayTime) / 86400000);
-
+        const remainDayd = Math.round((lastDateStr - todayTime) / 86400000);
         let lastDateValue = "";
         if (lastDateStr) {
             const d = new Date(lastTime);
@@ -64,6 +64,10 @@ function renderTable(data) {
         else if (remainDays <= 0) {
             stText = "CẦN BẢO TRÌ";
             stClass = "st-danger";
+        }
+        else if (remainDayd >= 0) {
+            stText = "AN TOÀN";
+            stClass = "st-success";
         }
         else if (remainDays > 0 && remainDays <= 3) {
             stText = "SẮP ĐẾN HẠN";
