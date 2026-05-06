@@ -61,7 +61,7 @@ function renderTable(data) {
             stText = "AN TOÀN";
             stClass = "st-success";
         }
-        else if (remainDays <= 0) {
+        else if (remainDays = 0) {
             stText = "CẦN BẢO TRÌ";
             stClass = "st-danger";
         }
