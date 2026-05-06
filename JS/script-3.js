@@ -57,17 +57,17 @@ function renderTable(data) {
             stText = "AN TOÀN";
             stClass = "st-success";
         } 
+        else if (remainDayd >= 0) {
+            stText = "AN TOÀN";
+            stClass = "st-success";
+        }
         else if (lastTime >= nextTime) {
             stText = "AN TOÀN";
             stClass = "st-success";
         }
-        else if (remainDays = 0) {
+        else if (remainDays <= 0) {
             stText = "CẦN BẢO TRÌ";
             stClass = "st-danger";
-        }
-        else if (remainDayd >= 0) {
-            stText = "AN TOÀN";
-            stClass = "st-success";
         }
         else if (remainDays > 0 && remainDays <= 3) {
             stText = "SẮP ĐẾN HẠN";
