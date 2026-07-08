@@ -34,7 +34,7 @@
         <h5 class="text-white mb-4">DANH MỤC</h5>
         <a href="index.html" onclick="toggleMenu()">➥ Báo cáo công việc</a>       
         <a href="danh-muc-thiet-bi.html" onclick="loadData(); toggleMenu()">➥ Danh mục thiết bị</a>
-        <a href="bao-tri-dinh-ky.html" onclick="loadData(); toggleMenu()">➥ Bảo trì định kỳ</a>
+        <!--<a href="bao-tri-dinh-ky.html" onclick="loadData(); toggleMenu()">➥ Bảo trì định kỳ</a>-->
         <a href="#" onclick="window.location.reload()">➥ Tải lại trang</a>
         <hr class="text-white">
 		<a href="#" onclick="changePassword(); toggleMenu()">🔑 Đổi mã PIN</a>
@@ -52,8 +52,18 @@
             <input type="date" id="ngay" class="form-control">
         </div>
         <div class="mb-3">
-            <label class="form-label">Nội dung công việc</label>
-            <textarea id="noidung" class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>
+            <label class="form-label">Nội dung công việc</label><br>
+            <div class="d-flex gap-1 mb-2">
+                <select id="noidung1" class="form-select" style="width: 35%;">
+                    <option value="Bảo trì định kỳ">Bảo trì định kỳ</option>
+                    <option value="Xử lý sự cố">Xử lý sự cố</option>
+                    <option value="Kiểm tra">Kiểm tra</option>
+					<option value="Vận hành máy nén khí">Vận hành MNK</option>
+                </select>
+                <input type="text" id="noidung3" class="form-control" value="KLM-CK-" style="width: 160px; display:inline-block;" oninput="autoFillDeviceName(this.value)">
+				<input type="text" id="noidung2" class="form-control" placeholder="Tên máy..." style="width: 35%;">
+            </div>
+            <input id="noidung4" class="form-control" rows="3" placeholder="Nhập nội dung chi tiết...">
         </div>
         <div class="mb-3">
             <label class="form-label">Trạng thái</label>
@@ -104,7 +114,7 @@
 
     <div class="report-container">
         <textarea id="reportText" class="form-control bg-light" rows="12" readonly 
-                  style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; font-size: 14px;"></textarea>
+                  style="font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; font-size: 14px; border-bottom-width: 20px;"></textarea>
     </div>
 </div>
 
