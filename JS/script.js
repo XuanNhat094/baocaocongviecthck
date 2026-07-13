@@ -1,6 +1,5 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 const DEVICE_URL = "https://script.google.com/macros/s/AKfycbzgX1RvgaxsBZn-GIfr1EaPSBxAZqn1mvE0MZGovnAN1UW0rV_tk4HV-BN34FkF6xfV/exec";
-
 const LOGIN_VERSION = "2026.06.03"; 
 
 let allData = [];      
@@ -116,7 +115,6 @@ async function changePassword() {
 
 async function loadData() {
     const reportArea = document.getElementById('reportText');
-    
     if (reportArea) {
         reportArea.value = "⏳ Đang đồng bộ và làm mới dữ liệu...";
     }
@@ -189,7 +187,7 @@ async function sendWorkReport() {
     const loader = document.getElementById('loadingSpinner');
     
     const noidung1 = document.getElementById('noidung1').value;
-    const noidung2 = document.getElementById('noidung2').value.trim();
+    const rawNoidung2 = document.getElementById('noidung2').value.trim();
     const noidung3 = document.getElementById('noidung3')?.value.trim().toUpperCase() || ""; 
     const noidung4 = document.getElementById('noidung4').value.trim();
     
@@ -199,11 +197,10 @@ async function sendWorkReport() {
     const tienDo = document.getElementById('ghichu').value;
     const trangthai = document.getElementById('trangthai').value;
 
-    if (!noidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ tên máy, nội dung và nhân sự!");
+    if (!rawNoidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ tên máy, nội dung và nhân sự!");
 
-    noidung2 = noidung2.charAt(0).toLowerCase() + noidung2.slice(1);
-    
-    const noidungHoanChinh = `${noidung1} ${noidung2} ${noidung3} ${noidung4}`;
+    const noidung2Formatted = rawNoidung2.charAt(0).toLowerCase() + rawNoidung2.slice(1);
+    const noidungHoanChinh = `${noidung1} ${noidung2Formatted} ${noidung3} ${noidung4}`.trim().replace(/\s+/g, ' ');
 
     const payload = {
         jobContent: noidungHoanChinh,
@@ -236,7 +233,8 @@ async function sendWorkReport() {
         });
         
         document.getElementById('noidung2').value = "";
-        document.getElementById('noidung3').value = "KLM-CK-";
+        const nd3 = document.getElementById('noidung3');
+        if (nd3) nd3.value = "KLM-CK-";
         document.getElementById('noidung4').value = "";
         filterData();
     } catch (err) {
@@ -262,7 +260,7 @@ function filterData() {
     } else {
         filtered.forEach(item => {
             let gc = (item.ghichu && item.ghichu !== "") ? ` ${item.ghichu}%` : "";
-            content += `- ${item.noidung} (${item.nhansu}) ${gc}\n`;
+            content += `- ${item.noidung} (${item.nhansu})${gc}\n`;
         });
     }
     reportArea.value = content;
@@ -289,7 +287,6 @@ function syncInput(val) {
     updateStatusByProgress(val);
 }
 
-// Hàm chạy khi bạn gõ số vào ô nhập liệu (Input số)
 function syncRange(val) {
     let v = Math.min(100, Math.max(0, parseInt(val) || 0));
     const pr = document.getElementById('progressRange');
@@ -302,12 +299,7 @@ function updateStatusByProgress(progressValue) {
     if (!txtTrangThai) return;
 
     let p = parseInt(progressValue) || 0;
-
-    if (p === 100) {
-        txtTrangThai.value = "Hoàn thành"; 
-    } else {
-        txtTrangThai.value = "Đang thực hiện"; 
-    }
+    txtTrangThai.value = (p === 100) ? "Hoàn thành" : "Đang thực hiện";
 }
 
 function toggleMenu() {
