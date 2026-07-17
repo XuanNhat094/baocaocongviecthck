@@ -1,5 +1,6 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 const DEVICE_URL = "https://script.google.com/macros/s/AKfycbzgX1RvgaxsBZn-GIfr1EaPSBxAZqn1mvE0MZGovnAN1UW0rV_tk4HV-BN34FkF6xfV/exec";
+
 const LOGIN_VERSION = "2026.06.03"; 
 
 let allData = [];      
@@ -34,7 +35,7 @@ window.onload = function() {
         if (el) el.value = today;
     });
 
-    loadData();       
+    loadData();        
     loadDeviceList(); 
 };
 
@@ -115,9 +116,10 @@ async function changePassword() {
 
 async function loadData() {
     const reportArea = document.getElementById('reportText');
-    if (reportArea) {
-        reportArea.value = "⏳ Đang đồng bộ và làm mới dữ liệu...";
-    }
+    const listArea = document.getElementById('reportList');
+    
+    if (reportArea) reportArea.value = "⏳ Đang đồng bộ và làm mới dữ liệu...";
+    if (listArea) listArea.innerHTML = "<div style='color:#6c757d; padding:8px;'>⏳ Đang đồng bộ...</div>";
 
     try {
         const res = await fetch(`${G_URL}?_cc=${new Date().getTime()}`);
@@ -129,11 +131,10 @@ async function loadData() {
         localStorage.setItem("cached_accounts", JSON.stringify(db_accounts));
         renderUserSelect();
         filterData();
-        console.log("✅ Ô copy đã được làm mới dữ liệu mới nhất!");
+        console.log("✅ Dữ liệu mới nhất đã đồng bộ thành công!");
     } catch (e) {
-        if (reportArea) {
-            reportArea.value = "⚠️ Lỗi làm mới dữ liệu. Vui lòng thử lại.";
-        }
+        if (reportArea) reportArea.value = "⚠️ Lỗi làm mới dữ liệu. Vui lòng thử lại.";
+        if (listArea) listArea.innerHTML = "<div style='color:#dc3545; padding:8px;'>⚠️ Lỗi kết nối Google Sheets.</div>";
         console.error("Lỗi khi click làm mới:", e);
     }
 }
@@ -187,8 +188,8 @@ async function sendWorkReport() {
     const loader = document.getElementById('loadingSpinner');
     
     const noidung1 = document.getElementById('noidung1').value;
-    const rawNoidung2 = document.getElementById('noidung2').value.trim();
-    const noidung3 = document.getElementById('noidung3')?.value.trim().toUpperCase() || ""; 
+    const noidung2 = document.getElementById('noidung2').value.trim();
+    const noidung3 = document.getElementById('noidung3').value.trim(); 
     const noidung4 = document.getElementById('noidung4').value.trim();
     
     const nhansu = document.getElementById('nhansu').value.trim();
@@ -197,17 +198,18 @@ async function sendWorkReport() {
     const tienDo = document.getElementById('ghichu').value;
     const trangthai = document.getElementById('trangthai').value;
 
-    if (!rawNoidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ tên máy, nội dung và nhân sự!");
+    if (!noidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ mã máy (để lấy tên máy) và nhân sự!");
 
-    const noidung2Formatted = rawNoidung2.charAt(0).toLowerCase() + rawNoidung2.slice(1);
-    const noidungHoanChinh = `${noidung1} ${noidung2Formatted} ${noidung3} ${noidung4}`.trim().replace(/\s+/g, ' ');
+    const noidungHoanChinh = `${noidung1} ${noidung3} ${noidung2} ${noidung4}`.trim();
 
     const payload = {
+        action: "create",
         jobContent: noidungHoanChinh,
         status: trangthai,
         worker: nhansu,
         note: tienDo,
-        reporter: reporter
+        reporter: reporter,
+        date: ngayReport
     };
 
     if (btn) btn.disabled = true;
@@ -223,20 +225,10 @@ async function sendWorkReport() {
         });
         
         alert("✅ Gửi thành công!");
-        
-        allData.unshift({ 
-            ngay: ngayReport, 
-            noidung: noidungHoanChinh, 
-            trangthai: trangthai, 
-            nhansu: nhansu, 
-            ghichu: tienDo 
-        });
-        
         document.getElementById('noidung2').value = "";
-        const nd3 = document.getElementById('noidung3');
-        if (nd3) nd3.value = "KLM-CK-";
+        document.getElementById('noidung3').value = "KLM-CK-";
         document.getElementById('noidung4').value = "";
-        filterData();
+        loadData();
     } catch (err) {
         alert("❌ Lỗi gửi: " + err.message);
     } finally {
@@ -247,28 +239,106 @@ async function sendWorkReport() {
 }
 
 function filterData() {
-    const filterVal = document.getElementById('filterDate').value;
+    const filterInput = document.getElementById('filterDate');
     const reportArea = document.getElementById('reportText');
-    if (!filterVal || !reportArea) return;
+    const listArea = document.getElementById('reportList');
+    
+    if (!filterInput) return;
+    const filterVal = filterInput.value;
+    if (!filterVal) return;
 
     const filtered = allData.filter(item => item.ngay && item.ngay.substring(0, 10) === filterVal);
     const d = filterVal.split('-');
-    let content = `Báo cáo công việc ngày ${d[2]}/${d[1]}/${d[0]}\n----------------------------------\n`;
+    
+    if (reportArea) {
+        let content = `Báo cáo công việc ngày ${d[2]}/${d[1]}/${d[0]}\n----------------------------------\n`;
+        if (filtered.length === 0) {
+            content += "(Chưa có dữ liệu)";
+        } else {
+            filtered.forEach(item => {
+                let gc = (item.ghichu && item.ghichu !== "") ? ` ${item.ghichu}%` : "";
+                content += `- ${item.noidung} (${item.nhansu || item.worker || ''})${gc}\n`;
+            });
+        }
+        reportArea.value = content;
+    }
 
-    if (filtered.length === 0) {
-        content += "(Chưa có dữ liệu)";
-    } else {
+    if (listArea) {
+        listArea.innerHTML = "";
+        if (filtered.length === 0) {
+            listArea.innerHTML = "<div style='color:#6c757d; padding:8px;'>(Chưa có dữ liệu ngày này)</div>";
+            return;
+        }
+        
         filtered.forEach(item => {
+            const rowId = item.id || item.rowNum; 
+            const div = document.createElement('div');
+            div.className = "list-group-item d-flex justify-content-between align-items-center gap-2 p-2";
+            div.style.borderBottom = "1px solid #dee2e6";
+            
             let gc = (item.ghichu && item.ghichu !== "") ? ` ${item.ghichu}%` : "";
-            content += `- ${item.noidung} (${item.nhansu})${gc}\n`;
+            const textHienThi = `- ${item.noidung} (${item.nhansu || item.worker || ''})${gc}`;
+            
+            div.innerHTML = `
+                <span class="report-item-text" style="font-size:14px; word-break: break-word;">${textHienThi}</span>
+                <div class="d-flex gap-1" style="flex-shrink: 0;">
+                    <button class="btn-sm btn-outline-warning" onclick="editReport('${rowId}', '${item.noidung}')">✏️</button>
+                    <button class="btn-sm btn-outline-danger" onclick="deleteReport('${rowId}')">❌</button>
+                </div>
+            `;
+            listArea.appendChild(div);
         });
     }
-    reportArea.value = content;
+}
+
+async function editReport(id, oldContent) {
+    if (!id || id === "undefined") return alert("❌ Không tìm thấy ID dòng để sửa. Hãy bấm làm mới!");
+    
+    const newContent = prompt("Chỉnh sửa nội dung báo cáo:", oldContent);
+    if (newContent === null) return; 
+    if (newContent.trim() === "") return alert("❌ Nội dung công việc không được để trống!");
+
+    const currentItem = allData.find(item => (item.id || item.rowNum).toString() === id.toString());
+    const oldWorker = currentItem ? (currentItem.nhansu || currentItem.worker || "") : "";
+
+    const newWorker = prompt("Chỉnh sửa nhân sự thực hiện:", oldWorker);
+    if (newWorker === null) return; 
+    if (newWorker.trim() === "") return alert("❌ Tên nhân sự không được để trống!");
+
+    const payload = { 
+        action: "update", 
+        id: id, 
+        jobContent: newContent.trim(),
+        worker: newWorker.trim() 
+    };
+    
+    try {
+        await fetch(G_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        alert("✅ Đã gửi yêu cầu sửa nội dung và nhân sự!");
+        loadData(); 
+    } catch (e) {
+        alert("❌ Lỗi sửa: " + e.message);
+    }
+}
+
+async function deleteReport(id) {
+    if (!id || id === "undefined") return alert("❌ Không tìm thấy ID dòng để xóa. Hãy bấm làm mới!");
+    if (!confirm("⚠️ Bạn có chắc chắn muốn XÓA dòng báo cáo này không?")) return;
+
+    const payload = { action: "delete", id: id };
+
+    try {
+        await fetch(G_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        alert("✅ Đã gửi yêu cầu xóa!");
+        loadData();
+    } catch (e) {
+        alert("❌ Lỗi xóa: " + e.message);
+    }
 }
 
 function copyReport() {
     const copyText = document.getElementById("reportText");
-    if (!copyText || !copyText.value || copyText.value.includes("Đang tải")) return;
+    if (!copyText || !copyText.value || copyText.value.includes("Đang đồng bộ")) return;
 
     copyText.select();
     navigator.clipboard.writeText(copyText.value).then(() => {
@@ -299,10 +369,41 @@ function updateStatusByProgress(progressValue) {
     if (!txtTrangThai) return;
 
     let p = parseInt(progressValue) || 0;
-    txtTrangThai.value = (p === 100) ? "Hoàn thành" : "Đang thực hiện";
+    if (p === 100) {
+        txtTrangThai.value = "Hoàn thành"; 
+    } else {
+        txtTrangThai.value = "Đang thực hiện"; 
+    }
 }
 
 function toggleMenu() {
-    const menu = document.getElementById("sideMenu");
-    if (menu) menu.style.width = (menu.style.width === "270px") ? "0" : "270px";
+    var menu = document.getElementById("sideMenu");
+    if (menu) menu.classList.toggle("open"); 
+}
+
+function toggleReportList() {
+    const wrapper = document.getElementById('reportListWrapper');
+    const btn = document.getElementById('btnToggleList');
+    
+    if (!wrapper || !btn) return;
+    
+    if (wrapper.style.display === "none") {
+        wrapper.style.display = "block";
+        btn.innerText = "🔼 Ẩn";
+        btn.style.backgroundColor = "#transparent";
+        btn.style.color = "#fff";
+		btn.style.marginBottom = "0px";
+    } else {
+        wrapper.style.display = "none";
+        btn.innerText = "🔽 Hiện";
+        btn.style.backgroundColor = "transparent";
+        btn.style.color = "#fff";
+		btn.style.marginBottom = "0px";
+    }
+}
+
+function logout() {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('reportUser');
+    window.location.reload();
 }
