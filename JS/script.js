@@ -188,8 +188,11 @@ async function sendWorkReport() {
     const loader = document.getElementById('loadingSpinner');
     
     const noidung1 = document.getElementById('noidung1').value;
-    const noidung2 = document.getElementById('noidung2').value.trim();
-    const noidung3 = document.getElementById('noidung3').value.trim(); 
+    const noidung2 = document.getElementById('noidung2').value.trim().toUpperCase();
+    let noidung3 = document.getElementById('noidung3').value.trim();
+    if (noidung3.length > 0) {
+        noidung3 = noidung3.charAt(0).toLowerCase() + noidung3.slice(1);
+    } 
     const noidung4 = document.getElementById('noidung4').value.trim();
     
     const nhansu = document.getElementById('nhansu').value.trim();
@@ -198,9 +201,9 @@ async function sendWorkReport() {
     const tienDo = document.getElementById('ghichu').value;
     const trangthai = document.getElementById('trangthai').value;
 
-    if (!noidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ mã máy (để lấy tên máy) và nhân sự!");
+    if (!noidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ tên máy và nhân sự!");
 
-    const noidungHoanChinh = `${noidung1} ${noidung3} ${noidung2} ${noidung4}`.trim();
+    const noidungHoanChinh = `${noidung1} ${noidung2} ${noidung3} ${noidung4}`.trim();
 
     const payload = {
         action: "create",
