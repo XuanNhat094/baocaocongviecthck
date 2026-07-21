@@ -188,10 +188,10 @@ async function sendWorkReport() {
     const loader = document.getElementById('loadingSpinner');
     
     const noidung1 = document.getElementById('noidung1').value;
-    const noidung2 = document.getElementById('noidung2').value.trim().toUpperCase();
-    let noidung3 = document.getElementById('noidung3').value.trim();
-    if (noidung3.length > 0) {
-        noidung3 = noidung3.charAt(0).toLowerCase() + noidung3.slice(1);
+    const noidung3 = document.getElementById('noidung3').value.trim().toUpperCase();
+    let noidung2 = document.getElementById('noidung2').value.trim();
+    if (noidung2.length > 0) {
+        noidung2 = noidung2.charAt(0).toLowerCase() + noidung2.slice(1);
     } 
     const noidung4 = document.getElementById('noidung4').value.trim();
     
