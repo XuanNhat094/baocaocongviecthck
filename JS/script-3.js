@@ -19,6 +19,20 @@ function getTimestamp(dateStr) {
 async function loadData() {
     showLoading(true);
     try {
+        let res = await fetch('bt_dinhky.json?t=' + Date.now());
+        if (!res.ok) {
+            res = await fetch('data/bt_dinhky_array.json?t=' + Date.now());
+        }
+        if (res.ok) {
+            const data = await res.json();
+            renderTable(data);
+            showLoading(false);
+            return;
+        }
+    } catch (e) {
+        console.warn("Lỗi tải local:", e.message);
+    }
+    try {
         const res = await fetch(`${WEB_APP_URL}?t=${Date.now()}`);
         const data = await res.json();
         renderTable(data);

@@ -12,6 +12,20 @@ let cachedData = [];
 async function loadData() {
     showLoading(true);
     try {
+        let res = await fetch('devices.json?t=' + Date.now());
+        if (!res.ok) {
+            res = await fetch('data/devices_array.json?t=' + Date.now());
+        }
+        if (res.ok) {
+            cachedData = await res.json();
+            renderTable(cachedData);
+            showLoading(false);
+            return;
+        }
+    } catch (e) {
+        console.warn("Lỗi tải local:", e.message);
+    }
+    try {
         const res = await fetch(`${WEB_APP_URL}?t=${Date.now()}`);
         cachedData = await res.json();
         renderTable(cachedData);

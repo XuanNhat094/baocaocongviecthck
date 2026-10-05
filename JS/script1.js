@@ -1,12 +1,15 @@
+// ==================== CẤU HÌNH ĐƯỜNG DẪN WEB APP ====================
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 const DEVICE_URL = "https://script.google.com/macros/s/AKfycbzgX1RvgaxsBZn-GIfr1EaPSBxAZqn1mvE0MZGovnAN1UW0rV_tk4HV-BN34FkF6xfV/exec";
 
 const LOGIN_VERSION = "2026.06.03"; 
 
+// ==================== BIẾN TOÀN CỤC BỘ NHỚ TẠM ====================
 let allData = [];      
 let db_accounts = {};  
-let ALL_DEVICES = [];  
+let ALL_DEVICES = [];  // Lưu mảng danh sách hàng (rows) từ sheet thiết bị
 
+// ==================== KHỞI TẠO KHI TẢI TRANG ====================
 window.onload = function() {
     const cachedAcc = localStorage.getItem("cached_accounts");
     if (cachedAcc) {
@@ -35,10 +38,11 @@ window.onload = function() {
         if (el) el.value = today;
     });
 
-    loadData();        
-    loadDeviceList(); 
+    loadData();       
+    loadDeviceList(); // Tải danh sách thiết bị
 };
 
+// ==================== QUẢN LÝ ĐĂNG NHẬP & TÀI KHOẢN ====================
 function renderUserSelect() {
     const select = document.getElementById("userNameInput");
     if (!select) return;
@@ -114,73 +118,76 @@ async function changePassword() {
     }
 }
 
+// ==================== TẢI DỮ LIỆU TỪ GOOGLE SHEETS ====================
 async function loadData() {
     const reportArea = document.getElementById('reportText');
-    const listArea = document.getElementById('reportList');
     
-    if (reportArea) reportArea.value = "⏳ Đang đồng bộ và làm mới dữ liệu...";
-    if (listArea) listArea.innerHTML = "<div style='color:#6c757d; padding:8px;'>⏳ Đang đồng bộ...</div>";
+    // Hiển thị trạng thái đang làm mới dữ liệu trong khung text
+    if (reportArea) {
+        reportArea.value = "⏳ Đang đồng bộ và làm mới dữ liệu...";
+    }
 
     try {
+        // Thêm tham số timestamp (?_cc=...) để ép trình duyệt xóa cache, lấy dữ liệu gốc mới nhất từ Sheets
         const res = await fetch(`${G_URL}?_cc=${new Date().getTime()}`);
         const json = await res.json();
         
         allData = json.reports || [];
         db_accounts = json.accounts || {};
 
+        // Cập nhật lại bộ nhớ đệm máy
         localStorage.setItem("cached_accounts", JSON.stringify(db_accounts));
+        
+        // Cập nhật lại danh sách chọn tên nhân sự
         renderUserSelect();
+        
+        // TỰ ĐỘNG CHẠY HÀM LỌC: Đổ ngay dữ liệu mới vào ô copy báo cáo
         filterData();
-        console.log("✅ Dữ liệu mới nhất đã đồng bộ thành công!");
+        
+        console.log("✅ Ô copy đã được làm mới dữ liệu mới nhất!");
     } catch (e) {
-        if (reportArea) reportArea.value = "⚠️ Lỗi làm mới dữ liệu. Vui lòng thử lại.";
-        if (listArea) listArea.innerHTML = "<div style='color:#dc3545; padding:8px;'>⚠️ Lỗi kết nối Google Sheets.</div>";
+        if (reportArea) {
+            reportArea.value = "⚠️ Lỗi làm mới dữ liệu. Vui lòng thử lại.";
+        }
         console.error("Lỗi khi click làm mới:", e);
     }
 }
 
+// Hàm tải danh mục thiết bị từ DEVICE_URL
 async function loadDeviceList() {
-    try {
-        const res = await fetch('devices.json');
-        if (res.ok) {
-            const json = await res.json();
-            ALL_DEVICES = Array.isArray(json) ? json.map(item => {
-                if (Array.isArray(item)) {
-                    return item;
-                }
-                return { mamay: item.mamay || item.code, tenmay: item.tenmay, macode: item.macode, code: item.code };
-            }) : (json.devices || json.data || json || []);
-            console.log("Đã tải danh mục máy (local):", ALL_DEVICES.length);
-            return;
-        }
-    } catch (e) {
-        console.warn("Không thể nạp devices.json local:", e.message);
-    }
     try {
         const res = await fetch(DEVICE_URL);
         const json = await res.json();
+        
+        // Nhận mảng thiết bị linh hoạt theo các kiểu trả về của file GS cũ thiết bị
         ALL_DEVICES = json.devices || json.data || json || [];
-        console.log("Đã tải danh mục máy (remote):", ALL_DEVICES);
+        console.log("Đã tải danh mục máy:", ALL_DEVICES);
     } catch (e) {
         console.error("Không thể nạp danh mục máy:", e.message);
     }
 }
 
+// ==================== SỬA TẠI ĐÂY: LOGIC TỰ ĐIỀN TÊN MÁY TỪ SHEET MỚI ====================
 function autoFillDeviceName(maSo) {
     const txtTenMay = document.getElementById('noidung2');
     if (!txtTenMay) return;
 
     const maTimKiem = maSo.trim().toUpperCase();
 
+    // Nếu để trống hoặc chưa nhập xong mã thì xóa trắng ô tên máy
     if (maTimKiem === "" || maTimKiem === "KLM-CK-") {
         txtTenMay.value = "";
         return;
     }
 
+    // So sánh mã số nhập vào với Cột B và lấy Tên máy ở Cột C
     const thietBiTimThay = ALL_DEVICES.find(item => {
         if (Array.isArray(item)) {
+            // Trường hợp dữ liệu sheet trả về dạng mảng thuần túy các dòng: row[1] chính là Cột B
             return (item[1] || "").toString().trim().toUpperCase() === maTimKiem;
         } else if (item && typeof item === 'object') {
+            // Trường hợp dữ liệu trả về dạng Object đã map tiêu đề cột:
+            // Tự động quét qua các thuộc tính phổ biến của Cột B (mamay, macode, code...)
             const maTrongHeThong = (item.mamay || item.macode || item.code || item.maThietBi || "").toString().trim().toUpperCase();
             return maTrongHeThong === maTimKiem;
         }
@@ -189,15 +196,18 @@ function autoFillDeviceName(maSo) {
 
     if (thietBiTimThay) {
         if (Array.isArray(thietBiTimThay)) {
+            // Nếu tìm thấy dạng mảng dòng: item[2] chính là giá trị Cột C (Tên máy)
             txtTenMay.value = thietBiTimThay[2] || "";
         } else {
+            // Nếu tìm thấy dạng Object: lấy thuộc tính tên máy tương ứng ở Cột C
             txtTenMay.value = thietBiTimThay.tenmay || thietBiTimThay.tenthietbi || thietBiTimThay.noidung || "";
         }
     } else {
-        txtTenMay.value = ""; 
+        txtTenMay.value = ""; // Không tìm thấy mã máy tương thích thì chừa trống để tự điền tay
     }
 }
 
+// ==================== GỬI BÁO CÁO CÔNG VIỆC ====================
 async function sendWorkReport() {
     const btn = document.getElementById('btnSubmit');
     const text = document.getElementById('btnText');
@@ -214,18 +224,16 @@ async function sendWorkReport() {
     const tienDo = document.getElementById('ghichu').value;
     const trangthai = document.getElementById('trangthai').value;
 
-    if (!noidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ mã máy (để lấy tên máy) và nhân sự!");
+    if (!noidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ tên máy, nội dung và nhân sự!");
 
-    const noidungHoanChinh = `${noidung1} ${noidung3} ${noidung2} ${noidung4}`.trim();
+    const noidungHoanChinh = `${noidung1} ${noidung2} ${noidung3} ${noidung4}`;
 
     const payload = {
-        action: "create",
         jobContent: noidungHoanChinh,
         status: trangthai,
         worker: nhansu,
         note: tienDo,
-        reporter: reporter,
-        date: ngayReport
+        reporter: reporter
     };
 
     if (btn) btn.disabled = true;
@@ -241,10 +249,18 @@ async function sendWorkReport() {
         });
         
         alert("✅ Gửi thành công!");
+        
+        allData.unshift({ 
+            ngay: ngayReport, 
+            noidung: noidungHoanChinh, 
+            trangthai: trangthai, 
+            nhansu: nhansu, 
+            ghichu: tienDo 
+        });
+        
         document.getElementById('noidung2').value = "";
-        document.getElementById('noidung3').value = "KLM-CK-";
         document.getElementById('noidung4').value = "";
-        loadData();
+        filterData();
     } catch (err) {
         alert("❌ Lỗi gửi: " + err.message);
     } finally {
@@ -254,107 +270,31 @@ async function sendWorkReport() {
     }
 }
 
+// ==================== LỌC DỮ LIỆU & HIỂN THỊ ====================
 function filterData() {
-    const filterInput = document.getElementById('filterDate');
+    const filterVal = document.getElementById('filterDate').value;
     const reportArea = document.getElementById('reportText');
-    const listArea = document.getElementById('reportList');
-    
-    if (!filterInput) return;
-    const filterVal = filterInput.value;
-    if (!filterVal) return;
+    if (!filterVal || !reportArea) return;
 
     const filtered = allData.filter(item => item.ngay && item.ngay.substring(0, 10) === filterVal);
     const d = filterVal.split('-');
-    
-    if (reportArea) {
-        let content = `Báo cáo công việc ngày ${d[2]}/${d[1]}/${d[0]}\n----------------------------------\n`;
-        if (filtered.length === 0) {
-            content += "(Chưa có dữ liệu)";
-        } else {
-            filtered.forEach(item => {
-                let gc = (item.ghichu && item.ghichu !== "") ? ` ${item.ghichu}%` : "";
-                content += `- ${item.noidung} (${item.nhansu || item.worker || ''})${gc}\n`;
-            });
-        }
-        reportArea.value = content;
-    }
+    let content = `Báo cáo công việc ngày ${d[2]}/${d[1]}/${d[0]}\n----------------------------------\n`;
 
-    if (listArea) {
-        listArea.innerHTML = "";
-        if (filtered.length === 0) {
-            listArea.innerHTML = "<div style='color:#6c757d; padding:8px;'>(Chưa có dữ liệu ngày này)</div>";
-            return;
-        }
-        
+    if (filtered.length === 0) {
+        content += "(Chưa có dữ liệu)";
+    } else {
         filtered.forEach(item => {
-            const rowId = item.id || item.rowNum; 
-            const div = document.createElement('div');
-            div.className = "list-group-item d-flex justify-content-between align-items-center gap-2 p-2";
-            div.style.borderBottom = "1px solid #dee2e6";
-            
             let gc = (item.ghichu && item.ghichu !== "") ? ` ${item.ghichu}%` : "";
-            const textHienThi = `- ${item.noidung} (${item.nhansu || item.worker || ''})${gc}`;
-            
-            div.innerHTML = `
-                <span class="report-item-text" style="font-size:14px; word-break: break-word;">${textHienThi}</span>
-                <div class="d-flex gap-1" style="flex-shrink: 0;">
-                    <button class="btn-sm btn-outline-warning" onclick="editReport('${rowId}', '${item.noidung}')">✏️</button>
-                    <button class="btn-sm btn-outline-danger" onclick="deleteReport('${rowId}')">❌</button>
-                </div>
-            `;
-            listArea.appendChild(div);
+            content += `- ${item.noidung} (${item.nhansu}) [${item.trangthai || "Hoàn thành"}]${gc}\n`;
         });
     }
+    reportArea.value = content;
 }
 
-async function editReport(id, oldContent) {
-    if (!id || id === "undefined") return alert("❌ Không tìm thấy ID dòng để sửa. Hãy bấm làm mới!");
-    
-    const newContent = prompt("Chỉnh sửa nội dung báo cáo:", oldContent);
-    if (newContent === null) return; 
-    if (newContent.trim() === "") return alert("❌ Nội dung công việc không được để trống!");
-
-    const currentItem = allData.find(item => (item.id || item.rowNum).toString() === id.toString());
-    const oldWorker = currentItem ? (currentItem.nhansu || currentItem.worker || "") : "";
-
-    const newWorker = prompt("Chỉnh sửa nhân sự thực hiện:", oldWorker);
-    if (newWorker === null) return; 
-    if (newWorker.trim() === "") return alert("❌ Tên nhân sự không được để trống!");
-
-    const payload = { 
-        action: "update", 
-        id: id, 
-        jobContent: newContent.trim(),
-        worker: newWorker.trim() 
-    };
-    
-    try {
-        await fetch(G_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-        alert("✅ Đã gửi yêu cầu sửa nội dung và nhân sự!");
-        loadData(); 
-    } catch (e) {
-        alert("❌ Lỗi sửa: " + e.message);
-    }
-}
-
-async function deleteReport(id) {
-    if (!id || id === "undefined") return alert("❌ Không tìm thấy ID dòng để xóa. Hãy bấm làm mới!");
-    if (!confirm("⚠️ Bạn có chắc chắn muốn XÓA dòng báo cáo này không?")) return;
-
-    const payload = { action: "delete", id: id };
-
-    try {
-        await fetch(G_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-        alert("✅ Đã gửi yêu cầu xóa!");
-        loadData();
-    } catch (e) {
-        alert("❌ Lỗi xóa: " + e.message);
-    }
-}
-
+// ==================== SAO CHÉP BÁO CÁO NHANH ====================
 function copyReport() {
     const copyText = document.getElementById("reportText");
-    if (!copyText || !copyText.value || copyText.value.includes("Đang đồng bộ")) return;
+    if (!copyText || !copyText.value || copyText.value.includes("Đang tải")) return;
 
     copyText.select();
     navigator.clipboard.writeText(copyText.value).then(() => {
@@ -367,59 +307,46 @@ function copyReport() {
     });
 }
 
+// ==================== ĐỒNG BỘ THANH TIẾN ĐỘ (%) & TỰ ĐỘNG CẬP NHẬT TRẠNG THÁI ====================
+
+// Hàm chạy khi bạn kéo thanh gạt (Range)
 function syncInput(val) {
     const gc = document.getElementById('ghichu');
     if (gc) gc.value = val;
+    
+    // Tự động cập nhật trạng thái dựa vào phần trăm
     updateStatusByProgress(val);
 }
 
+// Hàm chạy khi bạn gõ số vào ô nhập liệu (Input số)
 function syncRange(val) {
     let v = Math.min(100, Math.max(0, parseInt(val) || 0));
     const pr = document.getElementById('progressRange');
     if (pr) pr.value = v;
+    
+    // Tự động cập nhật trạng thái dựa vào phần trăm
     updateStatusByProgress(v);
 }
 
+// Hàm phụ trách kiểm tra số % để tự động đổi tùy chọn ở ô Trạng thái
 function updateStatusByProgress(progressValue) {
     const txtTrangThai = document.getElementById('trangthai');
     if (!txtTrangThai) return;
 
     let p = parseInt(progressValue) || 0;
+
     if (p === 100) {
+        // Nếu giá trị là 100%, chọn trạng thái "Hoàn thành"
+        // Bạn hãy kiểm tra xem trong file HTML, thuộc tính value của option Hoàn thành là gì (Ví dụ: "Hoàn thành" hoặc "Done")
         txtTrangThai.value = "Hoàn thành"; 
     } else {
+        // Nếu dưới 100%, chọn trạng thái "Đang thực hiện"
+        // Kiểm tra xem trong file HTML, option Đang thực hiện có value chính xác là gì nhé
         txtTrangThai.value = "Đang thực hiện"; 
     }
 }
-
+// ==================== HIỂN THỊ MENU SIDEBAR ====================
 function toggleMenu() {
-    var menu = document.getElementById("sideMenu");
-    if (menu) menu.classList.toggle("open"); 
-}
-
-function toggleReportList() {
-    const wrapper = document.getElementById('reportListWrapper');
-    const btn = document.getElementById('btnToggleList');
-    
-    if (!wrapper || !btn) return;
-    
-    if (wrapper.style.display === "none") {
-        wrapper.style.display = "block";
-        btn.innerText = "🔼 Ẩn";
-        btn.style.backgroundColor = "#transparent";
-        btn.style.color = "#fff";
-		btn.style.marginBottom = "0px";
-    } else {
-        wrapper.style.display = "none";
-        btn.innerText = "🔽 Hiện";
-        btn.style.backgroundColor = "transparent";
-        btn.style.color = "#fff";
-		btn.style.marginBottom = "0px";
-    }
-}
-
-function logout() {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('reportUser');
-    window.location.reload();
+    const menu = document.getElementById("sideMenu");
+    if (menu) menu.style.width = (menu.style.width === "270px") ? "0" : "270px";
 }
