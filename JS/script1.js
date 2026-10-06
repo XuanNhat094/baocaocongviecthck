@@ -2,7 +2,7 @@
 const G_URL = "https://script.google.com/macros/s/AKfycbzwW5Taa_YOZ1DF_mJGQ4-UStSUCg8WYzldkC_v1nwianvF3oUdsA0n9x04jDI4DdrB0A/exec";
 const DEVICE_URL = "https://script.google.com/macros/s/AKfycbzgX1RvgaxsBZn-GIfr1EaPSBxAZqn1mvE0MZGovnAN1UW0rV_tk4HV-BN34FkF6xfV/exec";
 
-const LOGIN_VERSION = "2026.06.03"; 
+const LOGIN_VERSION = "2026.10.06"; 
 
 // ==================== BIẾN TOÀN CỤC BỘ NHỚ TẠM ====================
 let allData = [];      
