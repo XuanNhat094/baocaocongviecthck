@@ -204,7 +204,7 @@ async function sendWorkReport() {
     const loader = document.getElementById('loadingSpinner');
     
     const noidung1 = document.getElementById('noidung1').value;
-    const noidung2 = document.getElementById('noidung2').value.trim();
+    let noidung2 = document.getElementById('noidung2').value.trim();
     const noidung3 = document.getElementById('noidung3').value.trim().toUpperCase();
     const noidung4 = document.getElementById('noidung4').value.trim();
     
