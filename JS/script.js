@@ -205,7 +205,7 @@ async function sendWorkReport() {
     
     const noidung1 = document.getElementById('noidung1').value;
     const noidung2 = document.getElementById('noidung2').value.trim();
-    const noidung3 = document.getElementById('noidung3').value.trim(); 
+    const noidung3 = document.getElementById('noidung3').value.trim().toUpperCase();
     const noidung4 = document.getElementById('noidung4').value.trim();
     
     const nhansu = document.getElementById('nhansu').value.trim();
@@ -215,7 +215,10 @@ async function sendWorkReport() {
     const trangthai = document.getElementById('trangthai').value;
 
     if (!noidung2 || !nhansu) return alert("⚠️ Vui lòng nhập đầy đủ mã máy (để lấy tên máy) và nhân sự!");
-
+    
+    // Viết thường chữ cái đầu của tên máy
+    noidung2 = noidung2.charAt(0).toLowerCase() + noidung2.slice(1);
+    
     const noidungHoanChinh = `${noidung1} ${noidung3} ${noidung2} ${noidung4}`.trim();
 
     const payload = {
