@@ -206,7 +206,7 @@ async function sendWorkReport() {
     const noidung1 = document.getElementById('noidung1').value;
     let noidung2 = document.getElementById('noidung2').value.trim();
     const noidung3 = document.getElementById('noidung3').value.trim().toUpperCase();
-    const noidung4 = document.getElementById('noidung4').value.trim();
+    let noidung4 = document.getElementById('noidung4').value.trim();
     
     const nhansu = document.getElementById('nhansu').value.trim();
     const reporter = localStorage.getItem("reportUser") || "Ẩn danh";
@@ -218,7 +218,7 @@ async function sendWorkReport() {
     
     // Viết thường chữ cái đầu của tên máy
     noidung2 = noidung2.charAt(0).toLowerCase() + noidung2.slice(1);
-    
+    noidung4 = noidung4.charAt(0).toLowerCase() + noidung4.slice(1);
     const noidungHoanChinh = `${noidung1} ${noidung3} ${noidung2} ${noidung4}`.trim();
 
     const payload = {
